@@ -2,23 +2,23 @@ package com.example.addiction2dcumpose.dataClasses
 
 import com.google.gson.annotations.SerializedName
 
-class MangaData(
+data class MangaData(
     @SerializedName("mal_id")
     val malId: Long,
     @SerializedName("images")
-    val images: Images,
+    val images: Images?,
     @SerializedName("title")
-    val title: String,
+    val title: String?,
     @SerializedName("status")
-    val status: String,
+    val status: String?,
     @SerializedName("chapters")
-    val chapters: Int,
+    val chapters: Int?,
     @SerializedName("volumes")
-    val volumes: Int,
+    val volumes: Int?,
     @SerializedName("type")
-    val type: String,
+    val type: String?,
     @SerializedName("synopsis")
-    val synopsis: String,
+    val synopsis: String?,
     @SerializedName("genres")
-    val genres: List<Genre>,
+    val genres: List<Genre>?,
 )

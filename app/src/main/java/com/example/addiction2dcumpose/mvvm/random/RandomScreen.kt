@@ -9,6 +9,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -26,6 +28,7 @@ import com.example.addiction2dcumpose.R
 import com.example.addiction2dcumpose.StubData.MangaStubData
 import com.example.addiction2dcumpose.StubData.MangaStubData.mangaData
 import com.example.addiction2dcumpose.dataClasses.MangaData
+import com.example.addiction2dcumpose.dataClasses.MangaResult
 import com.example.rxpractic.ui.theme.Addiction2DTheme
 import com.example.rxpractic.ui.theme.Shapes
 
@@ -35,14 +38,44 @@ class RandomScreen(val viewModel: RandomViewModel) : BaseScreen() {
 
     @Composable
     fun Screen() {
+        val state = viewModel.mangaLiveData.observeAsState()
+        if (state.value is MangaResult.Success){
+            val data = (state.value as MangaResult.Success)
+            println("AAA ${data.mangaData} ")
+        }
+        when (state.value) {
+            is MangaResult.Success -> {
+                OnSuccessScreen(
+                    mangaData = (state.value as MangaResult.Success).mangaData,
+                    onBackClick = {},
+                    onNextClick = { viewModel.loadNextRandomMangaTitle() })
 
+                println("AAA OnSuccessScreen")
+            }
+            MangaResult.Error -> {
+                println("AAA OnErrorScreen")
+            }
+            MangaResult.Progress -> {
+                println("AAA OnProgressScreen")
+            }
+            null -> {
+                println("AAA OnNullScreen")
+            }
+        }
 
-        val state = remember { mutableStateOf(MangaStubData.mangaData) }
+    }
+
+    @Composable
+    private fun OnSuccessScreen(
+        mangaData: MangaData,
+        onBackClick: () -> Unit,
+        onNextClick: () -> Unit
+    ) {
         Addiction2DTheme {
             Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Spacer(modifier = Modifier.size(16.dp))
                 ImageTitleCard(
-                    mangaData = state.value,
+                    mangaData = mangaData,
                     modifier = Modifier.size(340.dp, 400.dp)
                 )
                 Spacer(modifier = Modifier.size(20.dp))
@@ -54,19 +87,15 @@ class RandomScreen(val viewModel: RandomViewModel) : BaseScreen() {
                 )
                 Spacer(modifier = Modifier.size(10.dp))
                 TwoButtons(
-                    onNextClick = {},
-                    onBackClick = {},
+                    onNextClick = { onNextClick.invoke() },
+                    onBackClick = { onBackClick.invoke() },
                     modifier = Modifier.size(width = 130.dp, height = 60.dp)
                 )
-
-
             }
-
         }
-
     }
 
-    @Preview
+
     @Composable
     fun ScreenPreview() {
         val state = remember { mutableStateOf(MangaStubData.mangaData) }
@@ -158,11 +187,11 @@ class RandomScreen(val viewModel: RandomViewModel) : BaseScreen() {
                         ) {
                             Text(text = stringResource(id = R.string.volume), style = style)
                             Spacer(modifier = Modifier.size(10.dp))
-                            Text(text = mangaData.volumes.toString(), style = style)
+                            Text(text = "${mangaData.volumes?:"?"}", style = style)
                             Spacer(modifier = Modifier.size(20.dp))
                             Text(text = stringResource(id = R.string.chapters), style = style)
                             Spacer(modifier = Modifier.size(10.dp))
-                            Text(text = mangaData.chapters.toString(), style = style)
+                            Text(text = "${mangaData.chapters?:"?"}", style = style)
                         }
                         Row(
                             Modifier
@@ -172,16 +201,14 @@ class RandomScreen(val viewModel: RandomViewModel) : BaseScreen() {
                         ) {
                             Text(text = stringResource(id = R.string.type), style = style)
                             Spacer(modifier = Modifier.size(10.dp))
-                            Text(text = mangaData.type, style = style)
+                            Text(text = mangaData.type ?: "No type", style = style)
                             Spacer(modifier = Modifier.size(20.dp))
                             Text(text = stringResource(id = R.string.status), style = style)
                             Spacer(modifier = Modifier.size(10.dp))
-                            Text(text = mangaData.status, style = style)
+                            Text(text = mangaData.status ?: "No status", style = style)
                         }
                     }
-                    Column {
 
-                    }
                 }
 
             }
@@ -201,9 +228,9 @@ class RandomScreen(val viewModel: RandomViewModel) : BaseScreen() {
             shape = RoundedCornerShape(18.dp)
         ) {
             Column {
-                Text(text = mangaData.title, modifier = Modifier.padding(8.dp))
+                Text(text = mangaData.title ?: "No title", modifier = Modifier.padding(8.dp))
                 com.skydoves.landscapist.glide.GlideImage(
-                    imageModel = mangaData.images.jpg.imageUrl,
+                    imageModel = mangaData.images?.jpg?.imageUrl,
                     placeHolder = painterResource(id = R.drawable.placeholder),
                     modifier = Modifier
                         .padding(start = 20.dp, end = 20.dp, bottom = 20.dp, top = 8.dp)
@@ -233,7 +260,7 @@ class RandomScreen(val viewModel: RandomViewModel) : BaseScreen() {
             shape = RoundedCornerShape(18.dp),
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = mangaData.title, Modifier.padding(8.dp))
+                Text(text = mangaData.title ?: "No title", Modifier.padding(8.dp))
                 Image(
                     painter = painterResource(id = R.drawable.placeholder),
                     contentDescription = null,
