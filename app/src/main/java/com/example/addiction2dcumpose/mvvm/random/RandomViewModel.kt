@@ -2,14 +2,15 @@ package com.example.addiction2dcumpose.mvvm.random
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.addiction2dcumpose.BaseViewModel
 import com.example.addiction2dcumpose.dataClasses.MangaResult
 import com.example.addiction2dcumpose.repositories.MangaRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class RandomViewModel(private val mangaRepository: MangaRepository) : BaseViewModel() {
+class RandomViewModel @Inject constructor(private val mangaRepository: MangaRepository) : ViewModel() {
 
     private val _mangaLiveData = MutableLiveData<MangaResult>()
     val mangaLiveData: LiveData<MangaResult>
@@ -24,7 +25,6 @@ class RandomViewModel(private val mangaRepository: MangaRepository) : BaseViewMo
             } catch (e: Throwable){
                 _mangaLiveData.value = MangaResult.Error
             }
-
         }
     }
 }

@@ -22,24 +22,17 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.addiction2dcumpose.BaseScreen
 import com.example.addiction2dcumpose.R
 import com.example.addiction2dcumpose.mvvm.random.RandomScreen
 import com.example.rxpractic.ui.theme.Addiction2DTheme
 
 
-class NavigateScreen {
+class NavigateScreen(private val navController: NavController): BaseScreen() {
 
     @Composable
     fun Screen() {
-        val navController = rememberNavController()
-
-        NavHost(navController = navController, startDestination = "navigate") {
-            composable("navigate") { Navigate(navController = navController) }
-            composable("search") { }
-            composable("favorite") {}
-            composable("random") { RandomScreen().Screen() }
-        }
-
+        Navigate(navController = navController)
     }
 
 

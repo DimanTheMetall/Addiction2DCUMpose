@@ -20,6 +20,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.addiction2dcumpose.BaseScreen
 import com.example.addiction2dcumpose.R
 import com.example.addiction2dcumpose.StubData.MangaStubData
 import com.example.addiction2dcumpose.StubData.MangaStubData.mangaData
@@ -28,11 +30,13 @@ import com.example.rxpractic.ui.theme.Addiction2DTheme
 import com.example.rxpractic.ui.theme.Shapes
 
 
-class RandomScreen {
+class RandomScreen(val viewModel: RandomViewModel) : BaseScreen() {
 
 
     @Composable
     fun Screen() {
+
+
         val state = remember { mutableStateOf(MangaStubData.mangaData) }
         Addiction2DTheme {
             Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
