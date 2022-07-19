@@ -12,20 +12,20 @@ class RandomScreenButtonState(val isBackButtonActive: Boolean, val isNextButtonA
                     isBackButtonActive = false,
                     isNextButtonActive = false
                 )
-            } else if (list.size == 1) {
+            } else if (list.isEmpty()) {
                 return RandomScreenButtonState(
                     isBackButtonActive = false,
                     isNextButtonActive = true
                 )
             } else {
                 when (currentIndex) {
-                    list.lastIndex -> {
-                        return RandomScreenButtonState(isBackButtonActive = true, isNextButtonActive = true)
-                    }
                     0 -> {
                         return RandomScreenButtonState(isBackButtonActive = false,
                             isNextButtonActive = true
                         )
+                    }
+                    list.lastIndex -> {
+                        return RandomScreenButtonState(isBackButtonActive = true, isNextButtonActive = true)
                     }
                     else -> {
                         return RandomScreenButtonState(isBackButtonActive = true,

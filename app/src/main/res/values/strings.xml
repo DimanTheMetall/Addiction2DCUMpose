@@ -8,6 +8,8 @@
     <string name="chapters">Chapters</string>
     <string name="type">Type</string>
     <string name="status">Status</string>
+    <string name="some_error" translatable="false">Some error happend, please check internet connection or write to Резиденция Козловых</string>
+
 
 
 </resources>

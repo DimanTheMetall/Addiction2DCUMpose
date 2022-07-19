@@ -2,17 +2,13 @@ package com.example.addiction2dcumpose.mvvm.random
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.addiction2dcumpose.StubData.MangaStubData
 import com.example.addiction2dcumpose.dataClasses.MangaData
 import com.example.addiction2dcumpose.dataClasses.MangaResult
 import com.example.addiction2dcumpose.dataClasses.RandomScreenButtonState
 import com.example.addiction2dcumpose.repositories.MangaRepository
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class RandomViewModel @Inject constructor(private val mangaRepository: MangaRepository) :
@@ -34,7 +30,7 @@ class RandomViewModel @Inject constructor(private val mangaRepository: MangaRepo
     val buttonsStateFlow = _buttonsStateFlow.asStateFlow()
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.Default) {
             _mangaFlowData.collect { mangaResult ->
                 _buttonsStateFlow.emit(
                     RandomScreenButtonState.generateButtonsState(
@@ -44,20 +40,23 @@ class RandomViewModel @Inject constructor(private val mangaRepository: MangaRepo
                     )
                 )
             }
-        }
-        onNextCLick()
 
+        }
+
+        onNextCLick()
     }
 
 
     fun onNextCLick() {
         viewModelScope.launch {
-            if (currentIndex==titlesList.lastIndex){
-                println("AAA a")
-                loadNextTitle().join()
-                getNextTitle()
+            if (currentIndex == titlesList.lastIndex) {
+                kotlin.runCatching {
+                    loadNextTitle()
+                    getNextTitle()
+                }
+                    .onFailure { _mangaFlowData.emit(MangaResult.Error) }
+
             } else {
-                println("AAA b")
                 getNextTitle()
             }
         }
@@ -71,14 +70,11 @@ class RandomViewModel @Inject constructor(private val mangaRepository: MangaRepo
         }
     }
 
-    private suspend fun loadNextTitle() = viewModelScope.launch {
+    private suspend fun loadNextTitle() {
         _mangaFlowData.emit(MangaResult.Progress)
-        try {
-            val result = async { mangaRepository.loadRandomManga().data }
-            titlesList.add(result.await())
-        } catch (e: Throwable) {
-            _mangaFlowData.emit(MangaResult.Error)
-        }
+        val result = mangaRepository.loadRandomManga().data
+        titlesList.add(result)
+
     }
 
     fun onBackClick() {

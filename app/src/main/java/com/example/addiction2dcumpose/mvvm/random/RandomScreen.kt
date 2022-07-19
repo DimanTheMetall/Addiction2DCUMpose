@@ -5,14 +5,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.SnackbarDefaults.backgroundColor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.res.painterResource
@@ -29,6 +27,7 @@ import com.example.addiction2dcumpose.dataClasses.MangaData
 import com.example.addiction2dcumpose.dataClasses.MangaResult
 import com.example.addiction2dcumpose.dataClasses.RandomScreenButtonState
 import com.example.rxpractic.ui.theme.Addiction2DTheme
+import com.skydoves.landscapist.CircularReveal
 
 
 class RandomScreen(val viewModel: RandomViewModel) : BaseScreen() {
@@ -37,25 +36,25 @@ class RandomScreen(val viewModel: RandomViewModel) : BaseScreen() {
     fun Screen() {
         val state = viewModel.mangaFLowData.collectAsState()
         val buttonsState = viewModel.buttonsStateFlow.collectAsState()
-        println("AAA $buttonsState")
 
         when (state.value) {
             is MangaResult.Success -> {
-                ResultScreen(
+                SuccessResultScreen(
                     mangaData = (state.value as MangaResult.Success).mangaData,
-                    onBackClick = {viewModel.onBackClick()},
+                    onBackClick = { viewModel.onBackClick() },
                     onNextClick = { viewModel.onNextCLick() },
                     buttonState = buttonsState.value
                 )
-
-
-                println("AAA OnSuccessScreen")
             }
             MangaResult.Error -> {
-                println("AAA OnErrorScreen")
+                OnErrorScreen(
+                    onNextClick = { viewModel.onNextCLick() },
+                    onBackClick = { viewModel.onBackClick() },
+                    buttonState = buttonsState.value
+                )
             }
             MangaResult.Progress -> {
-                println("AAA OnProgressScreen")
+                OnLoadingScreen()
             }
         }
 
@@ -63,7 +62,66 @@ class RandomScreen(val viewModel: RandomViewModel) : BaseScreen() {
 }
 
 @Composable
-private fun ResultScreen(
+private fun OnLoadingScreen() {
+    Addiction2DTheme {
+        CircularProgressIndicator(modifier = Modifier.fillMaxSize().padding(30.dp), strokeWidth = 16.dp)
+    }
+}
+
+@Composable
+private fun OnErrorScreen(
+    onNextClick: () -> Unit,
+    onBackClick: () -> Unit,
+    buttonState: RandomScreenButtonState
+) {
+    Addiction2DTheme {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+
+            Card(
+                shape = CircleShape,
+                border = BorderStroke(2.dp, MaterialTheme.colors.primary),
+                modifier = Modifier.padding(top = 10.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.placeholder),
+                    contentDescription = null
+                )
+            }
+            Card(
+                shape = CircleShape,
+                border = BorderStroke(2.dp, MaterialTheme.colors.primary),
+                modifier = Modifier
+            ) {
+                Text(
+                    text = stringResource(id = R.string.some_error),
+                    modifier = Modifier.padding(16.dp),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.h5
+                )
+
+            }
+        }
+        TwoButtons(
+            onNextClick = onNextClick,
+            onBackClick = onBackClick,
+            state = buttonState,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 20.dp),
+            verticalAlignment = Alignment.Bottom
+        )
+
+    }
+}
+
+@Composable
+private fun SuccessResultScreen(
     mangaData: MangaData,
     onBackClick: () -> Unit,
     onNextClick: () -> Unit,
@@ -73,6 +131,8 @@ private fun ResultScreen(
     val isScrolling = scrollState.isScrollInProgress
     val cardsWidth = 340.dp
     val cardShape = RoundedCornerShape(18.dp)
+
+    val space = 16.dp
 
 
 
@@ -84,14 +144,14 @@ private fun ResultScreen(
                 .verticalScroll(state = scrollState),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.size(space))
             ImageTitleCard(
                 mangaData = mangaData,
                 modifier = Modifier.size(width = cardsWidth, height = 500.dp),
                 shape = cardShape,
                 borderStroke = cardBorder
             )
-            Spacer(modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.size(space))
             if (!mangaData.genres.isNullOrEmpty()) {
                 GenresCard(
                     genresList = mangaData.genres,
@@ -103,7 +163,7 @@ private fun ResultScreen(
                     borderStroke = cardBorder
                 )
             }
-            Spacer(modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.size(space))
             MangaInfoCard(
                 mangaData = mangaData,
                 style = MaterialTheme.typography.h6,
@@ -113,6 +173,15 @@ private fun ResultScreen(
                 shape = cardShape,
                 borderStroke = cardBorder
             )
+            Spacer(modifier = Modifier.size(space))
+            if (!mangaData.synopsis.isNullOrEmpty()) SynopsysCard(
+                synopsys = mangaData.synopsis,
+                shape = cardShape,
+                modifier = Modifier
+                    .wrapContentSize()
+                    .width(cardsWidth),
+                borderStroke = cardBorder
+            )
         }
         if (!isScrolling) TwoButtons(
             onNextClick = { onNextClick.invoke() },
@@ -120,11 +189,19 @@ private fun ResultScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(bottom = 20.dp),
-            state = buttonState
+            state = buttonState,
+            verticalAlignment = Alignment.Bottom
         )
 
     }
 
+}
+
+@Composable
+private fun SynopsysCard(modifier: Modifier = Modifier, synopsys: String, shape: Shape, borderStroke: BorderStroke) {
+    Card(modifier = modifier, shape = shape, border = borderStroke) {
+        Text(text = synopsys, modifier = Modifier.padding(10.dp), textAlign = TextAlign.Justify)
+    }
 }
 
 @Composable
@@ -160,7 +237,8 @@ private fun TwoButtons(
     modifier: Modifier = Modifier,
     onNextClick: () -> Unit,
     onBackClick: () -> Unit,
-    state: RandomScreenButtonState
+    state: RandomScreenButtonState,
+    verticalAlignment: Alignment.Vertical
 ) {
     val buttonsModifier = Modifier
         .size(40.dp)
@@ -169,7 +247,7 @@ private fun TwoButtons(
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.Bottom
+        verticalAlignment = verticalAlignment
     ) {
         FloatingActionButton(
             onClick = onBackClick,
@@ -303,7 +381,9 @@ private fun ImageTitleCard(
                         shape = roundCornerShape
                     )
                     .clip(roundCornerShape),
-                previewPlaceholder = R.drawable.placeholder
+                previewPlaceholder = R.drawable.placeholder,
+                circularReveal = CircularReveal(),
+                error = painterResource(id = R.drawable.placeholder)
             )
         }
     }
@@ -312,7 +392,7 @@ private fun ImageTitleCard(
 @Preview(showBackground = true)
 @Composable
 private fun OnSuccessScreenPreview() {
-    ResultScreen(
+    SuccessResultScreen(
         mangaData = mangaData,
         onBackClick = { /*TODO*/ },
         onNextClick = { TODO() },
@@ -321,6 +401,22 @@ private fun OnSuccessScreenPreview() {
             isNextButtonActive = false
         )
     )
+}
+
+@Preview
+@Composable
+private fun OnErrorScreenPreview() {
+    Addiction2DTheme {
+        OnErrorScreen(
+            onNextClick = { },
+            onBackClick = { },
+            buttonState = RandomScreenButtonState(
+                isBackButtonActive = true,
+                isNextButtonActive = true
+            )
+        )
+    }
+
 }
 
 
