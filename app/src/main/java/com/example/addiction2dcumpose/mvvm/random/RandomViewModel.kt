@@ -1,18 +1,17 @@
 package com.example.addiction2dcumpose.mvvm.random
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.addiction2dcumpose.StubData.MangaStubData
 import com.example.addiction2dcumpose.dataClasses.MangaData
 import com.example.addiction2dcumpose.dataClasses.MangaResult
+import com.example.addiction2dcumpose.dataClasses.RandomScreenButtonState
 import com.example.addiction2dcumpose.repositories.MangaRepository
-import io.reactivex.Flowable
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,26 +19,73 @@ class RandomViewModel @Inject constructor(private val mangaRepository: MangaRepo
     ViewModel() {
 
     private val titlesList: MutableList<MangaData> = mutableListOf()
+    private var currentIndex = -1
 
     private val _mangaFlowData =
-        MutableStateFlow<MangaResult>(MangaResult.Success(MangaStubData.mangaData))
+        MutableStateFlow<MangaResult>(MangaResult.Progress)
     val mangaFLowData = _mangaFlowData.asStateFlow()
 
+    private val _buttonsStateFlow = MutableStateFlow(
+        RandomScreenButtonState(
+            isBackButtonActive = false,
+            isNextButtonActive = true
+        )
+    )
+    val buttonsStateFlow = _buttonsStateFlow.asStateFlow()
 
-    fun loadNextRandomMangaTitle() {
+    init {
         viewModelScope.launch {
-            _mangaFlowData.emit(MangaResult.Progress)
-            try {
-                titlesList.add(mangaRepository.loadRandomManga().data)
-                _mangaFlowData.emit(MangaResult.Success(titlesList.last()))
-            } catch (e: Throwable) {
-                _mangaFlowData.emit(MangaResult.Error)
+            _mangaFlowData.collect { mangaResult ->
+                _buttonsStateFlow.emit(
+                    RandomScreenButtonState.generateButtonsState(
+                        list = titlesList,
+                        currentIndex = currentIndex,
+                        status = mangaResult
+                    )
+                )
             }
+        }
+        onNextCLick()
+
+    }
+
+
+    fun onNextCLick() {
+        viewModelScope.launch {
+            if (currentIndex==titlesList.lastIndex){
+                println("AAA a")
+                loadNextTitle().join()
+                getNextTitle()
+            } else {
+                println("AAA b")
+                getNextTitle()
+            }
+        }
+
+    }
+
+    private suspend fun getNextTitle() {
+        viewModelScope.launch {
+            currentIndex++
+            _mangaFlowData.emit(MangaResult.Success(titlesList[currentIndex]))
         }
     }
 
-    fun getPreviousMangaTitle(){
+    private suspend fun loadNextTitle() = viewModelScope.launch {
+        _mangaFlowData.emit(MangaResult.Progress)
+        try {
+            val result = async { mangaRepository.loadRandomManga().data }
+            titlesList.add(result.await())
+        } catch (e: Throwable) {
+            _mangaFlowData.emit(MangaResult.Error)
+        }
+    }
 
+    fun onBackClick() {
+        viewModelScope.launch {
+            currentIndex--
+            _mangaFlowData.emit(MangaResult.Success(titlesList[currentIndex]))
+        }
     }
 
 
