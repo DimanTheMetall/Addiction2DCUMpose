@@ -1,9 +1,6 @@
 package com.example.addiction2dcumpose.StubData
 
-import com.example.addiction2dcumpose.dataClasses.Genre
-import com.example.addiction2dcumpose.dataClasses.Images
-import com.example.addiction2dcumpose.dataClasses.JPGImage
-import com.example.addiction2dcumpose.dataClasses.MangaData
+import com.example.addiction2dcumpose.dataClasses.*
 
 object MangaStubData {
     val mangaData = MangaData(
@@ -21,6 +18,12 @@ object MangaStubData {
         volumes = 1,
         type = "Light Novel",
         synopsis = "Looking for information on the light novel Yuuwaku Choukyou Hitorijime: Gibo no Himitsu Menu? Find out more with MyAnimeList, the world's most active online anime and manga community and database.",
-        genres = listOf(Genre(malId = 12, name = "Hentai"), Genre(malId = 10, name = "Something"))
+        genres = listOf(
+            MangaItemReceive(id = 12, name = "Hentai"),
+            MangaItemReceive(id = 10, name = "Something")
+        ),
+        authors = listOf(MangaItemReceive(id = 2, name = "Ivan, Ivanov"))
     )
+
+
 }

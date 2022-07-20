@@ -22,10 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.example.addiction2dcumpose.BaseScreen
 import com.example.addiction2dcumpose.R
 import com.example.addiction2dcumpose.StubData.MangaStubData.mangaData
-import com.example.addiction2dcumpose.dataClasses.Genre
-import com.example.addiction2dcumpose.dataClasses.MangaData
-import com.example.addiction2dcumpose.dataClasses.MangaResult
-import com.example.addiction2dcumpose.dataClasses.RandomScreenButtonState
+import com.example.addiction2dcumpose.dataClasses.*
 import com.example.rxpractic.ui.theme.Addiction2DTheme
 import com.skydoves.landscapist.CircularReveal
 import kotlin.math.max
@@ -159,15 +156,27 @@ private fun SuccessResultScreen(
             )
             Spacer(modifier = Modifier.size(space))
             if (!mangaData.genres.isNullOrEmpty()) {
-                GenresCard(
-                    genresList = mangaData.genres,
+                ItemsCard(
+                    itemsList = mangaData.genres,
                     shape = cardShape,
                     modifier = Modifier
                         .width(cardsWidth)
                         .wrapContentSize(),
-                    borderStroke = cardBorder
+                    borderStroke = cardBorder,
+                    title = stringResource(id = R.string.genres)
                 )
             }
+            Spacer(modifier = Modifier.size(space))
+            if (!mangaData.authors.isNullOrEmpty()) ItemsCard(
+                itemsList = mangaData.authors,
+                shape = cardShape,
+                borderStroke = cardBorder,
+                modifier = Modifier
+                    .width(cardsWidth)
+                    .wrapContentSize(),
+                title = stringResource(id = R.string.authors)
+
+            )
             Spacer(modifier = Modifier.size(space))
             MangaInfoCard(
                 mangaData = mangaData,
@@ -202,6 +211,7 @@ private fun SuccessResultScreen(
 
 }
 
+
 @Composable
 private fun SynopsysCard(
     modifier: Modifier = Modifier,
@@ -215,29 +225,33 @@ private fun SynopsysCard(
 }
 
 @Composable
-private fun GenresCard(
+private fun ItemsCard(
     modifier: Modifier = Modifier,
-    genresList: List<Genre>,
+    itemsList: List<MangaItemReceive>,
     shape: Shape,
-    borderStroke: BorderStroke
+    borderStroke: BorderStroke,
+    title: String
 ) {
     Card(modifier = modifier, shape = shape, border = borderStroke) {
-        CustomFlexBox {
-            genresList.forEach { genre ->
-                GenresItem(genre = genre, modifier = Modifier.wrapContentSize())
+        Column(modifier = Modifier.fillMaxSize()) {
+            Text(text = title, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+            CustomFlexBox {
+                itemsList.forEach { items ->
+                    TextItem(string = items.name ?: "", modifier = Modifier.wrapContentSize())
+                }
             }
         }
     }
 }
 
 @Composable
-private fun GenresItem(modifier: Modifier = Modifier, genre: Genre) {
+private fun TextItem(modifier: Modifier = Modifier, string: String) {
     Card(
         modifier = modifier.padding(6.dp),
         backgroundColor = MaterialTheme.colors.background,
         shape = RoundedCornerShape(8.dp)
     ) {
-        Text(text = genre.name, modifier = Modifier.padding(4.dp))
+        Text(text = string, modifier = Modifier.padding(4.dp))
     }
 }
 

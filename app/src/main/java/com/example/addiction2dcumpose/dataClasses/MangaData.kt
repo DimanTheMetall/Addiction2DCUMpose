@@ -20,5 +20,7 @@ data class MangaData(
     @SerializedName("synopsis")
     val synopsis: String?,
     @SerializedName("genres")
-    val genres: List<Genre>?,
+    val genres: List<MangaItemReceive>?,
+    @SerializedName("authors")
+    val authors: List<MangaItemReceive>?
 )
