@@ -28,6 +28,7 @@ import com.example.addiction2dcumpose.dataClasses.MangaResult
 import com.example.addiction2dcumpose.dataClasses.RandomScreenButtonState
 import com.example.rxpractic.ui.theme.Addiction2DTheme
 import com.skydoves.landscapist.CircularReveal
+import kotlin.math.max
 
 
 class RandomScreen(val viewModel: RandomViewModel) : BaseScreen() {
@@ -64,7 +65,12 @@ class RandomScreen(val viewModel: RandomViewModel) : BaseScreen() {
 @Composable
 private fun OnLoadingScreen() {
     Addiction2DTheme {
-        CircularProgressIndicator(modifier = Modifier.fillMaxSize().padding(30.dp), strokeWidth = 16.dp)
+        CircularProgressIndicator(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(30.dp),
+            strokeWidth = 16.dp
+        )
     }
 }
 
@@ -158,7 +164,6 @@ private fun SuccessResultScreen(
                     shape = cardShape,
                     modifier = Modifier
                         .width(cardsWidth)
-                        .height(90.dp)
                         .wrapContentSize(),
                     borderStroke = cardBorder
                 )
@@ -198,7 +203,12 @@ private fun SuccessResultScreen(
 }
 
 @Composable
-private fun SynopsysCard(modifier: Modifier = Modifier, synopsys: String, shape: Shape, borderStroke: BorderStroke) {
+private fun SynopsysCard(
+    modifier: Modifier = Modifier,
+    synopsys: String,
+    shape: Shape,
+    borderStroke: BorderStroke
+) {
     Card(modifier = modifier, shape = shape, border = borderStroke) {
         Text(text = synopsys, modifier = Modifier.padding(10.dp), textAlign = TextAlign.Justify)
     }
@@ -280,19 +290,32 @@ private fun CustomFlexBox(modifier: Modifier = Modifier, content: @Composable ()
         val placeables = measurables.map { measurable ->
             measurable.measure(constraints)
         }
+        var maxWidth = 0
+        var maxHeight = placeables[0].height
+        var currentWidth = 0
 
-        layout(width = constraints.maxWidth, height = constraints.maxHeight) {
-            var y = 0
-            var x = 0
+        placeables.forEach { placeable ->
+            if (placeable.width + currentWidth > constraints.maxWidth) {
+                println("AAA is true")
+                currentWidth = 0
+                maxWidth = max(a = placeable.width + currentWidth, b = maxWidth)
+                maxHeight += placeable.height
+            }
+            currentWidth += placeable.width
+        }
+
+        layout(width = constraints.maxWidth, height = maxHeight) {
+            var placeableY = 0
+            var placeableX = 0
 
             placeables.forEach { placeable ->
-                if (placeable.width + x > constraints.maxWidth) {
-                    x = 0
-                    y += placeable.height
+                if (placeable.width + placeableX > constraints.maxWidth) {
+                    placeableX = 0
+                    placeableY += placeable.height
                 }
 
-                placeable.place(x, y)
-                x += placeable.width
+                placeable.placeRelative(placeableX, placeableY)
+                placeableX += placeable.width
             }
 
         }
