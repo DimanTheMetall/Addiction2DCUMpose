@@ -47,7 +47,7 @@ class NavigateScreen(private val navController: NavController): BaseScreen() {
                 Spacer(modifier = Modifier.size(width = 310.dp, height = 20.dp))
 
                 ChooseCard(title = R.string.search) {
-
+                    navController.navigate("search")
                 }
 
                 ChooseCard(title = R.string.favorite) {

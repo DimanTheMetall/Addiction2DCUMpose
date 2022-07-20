@@ -21,6 +21,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.addiction2dcumpose.BaseScreen
 import com.example.addiction2dcumpose.R
+import com.example.addiction2dcumpose.States.MangaResultState
+import com.example.addiction2dcumpose.States.RandomScreenButtonState
 import com.example.addiction2dcumpose.StubData.MangaStubData.mangaData
 import com.example.addiction2dcumpose.dataClasses.*
 import com.example.rxpractic.ui.theme.Addiction2DTheme
@@ -36,22 +38,22 @@ class RandomScreen(val viewModel: RandomViewModel) : BaseScreen() {
         val buttonsState = viewModel.buttonsStateFlow.collectAsState()
 
         when (state.value) {
-            is MangaResult.Success -> {
+            is MangaResultState.Success -> {
                 SuccessResultScreen(
-                    mangaData = (state.value as MangaResult.Success).mangaData,
+                    mangaData = (state.value as MangaResultState.Success).mangaData,
                     onBackClick = { viewModel.onBackClick() },
                     onNextClick = { viewModel.onNextCLick() },
                     buttonState = buttonsState.value
                 )
             }
-            MangaResult.Error -> {
+            MangaResultState.Error -> {
                 OnErrorScreen(
                     onNextClick = { viewModel.onNextCLick() },
                     onBackClick = { viewModel.onBackClick() },
                     buttonState = buttonsState.value
                 )
             }
-            MangaResult.Progress -> {
+            MangaResultState.Progress -> {
                 OnLoadingScreen()
             }
         }
@@ -136,8 +138,6 @@ private fun SuccessResultScreen(
     val cardShape = RoundedCornerShape(18.dp)
 
     val space = 16.dp
-
-
 
     Addiction2DTheme {
         val cardBorder = BorderStroke(2.dp, MaterialTheme.colors.primary)

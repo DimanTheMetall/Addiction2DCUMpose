@@ -1,13 +1,13 @@
-package com.example.addiction2dcumpose.dataClasses
+package com.example.addiction2dcumpose.States
 
 class RandomScreenButtonState(val isBackButtonActive: Boolean, val isNextButtonActive: Boolean) {
     companion object StateGenerator {
         fun generateButtonsState(
             list: List<Any>,
             currentIndex: Int,
-            status: MangaResult
+            status: MangaResultState
         ): RandomScreenButtonState {
-            if (status == MangaResult.Progress) {
+            if (status == MangaResultState.Progress) {
                 return RandomScreenButtonState(
                     isBackButtonActive = false,
                     isNextButtonActive = false

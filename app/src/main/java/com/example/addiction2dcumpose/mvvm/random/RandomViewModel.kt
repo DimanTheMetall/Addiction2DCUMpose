@@ -3,8 +3,8 @@ package com.example.addiction2dcumpose.mvvm.random
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.addiction2dcumpose.dataClasses.MangaData
-import com.example.addiction2dcumpose.dataClasses.MangaResult
-import com.example.addiction2dcumpose.dataClasses.RandomScreenButtonState
+import com.example.addiction2dcumpose.States.MangaResultState
+import com.example.addiction2dcumpose.States.RandomScreenButtonState
 import com.example.addiction2dcumpose.repositories.MangaRepository
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,11 +14,11 @@ import javax.inject.Inject
 class RandomViewModel @Inject constructor(private val mangaRepository: MangaRepository) :
     ViewModel() {
 
-    private val titlesList: MutableList<MangaData> = mutableListOf()
+    private val mangaList: MutableList<MangaData> = mutableListOf()
     private var currentIndex = -1
 
     private val _mangaFlowData =
-        MutableStateFlow<MangaResult>(MangaResult.Progress)
+        MutableStateFlow<MangaResultState>(MangaResultState.Progress)
     val mangaFLowData = _mangaFlowData.asStateFlow()
 
     private val _buttonsStateFlow = MutableStateFlow(
@@ -34,7 +34,7 @@ class RandomViewModel @Inject constructor(private val mangaRepository: MangaRepo
             _mangaFlowData.collect { mangaResult ->
                 _buttonsStateFlow.emit(
                     RandomScreenButtonState.generateButtonsState(
-                        list = titlesList,
+                        list = mangaList,
                         currentIndex = currentIndex,
                         status = mangaResult
                     )
@@ -49,12 +49,12 @@ class RandomViewModel @Inject constructor(private val mangaRepository: MangaRepo
 
     fun onNextCLick() {
         viewModelScope.launch {
-            if (currentIndex == titlesList.lastIndex) {
+            if (currentIndex == mangaList.lastIndex) {
                 kotlin.runCatching {
                     loadNextTitle()
                     getNextTitle()
                 }
-                    .onFailure { _mangaFlowData.emit(MangaResult.Error) }
+                    .onFailure { _mangaFlowData.emit(MangaResultState.Error) }
 
             } else {
                 getNextTitle()
@@ -66,21 +66,21 @@ class RandomViewModel @Inject constructor(private val mangaRepository: MangaRepo
     private suspend fun getNextTitle() {
         viewModelScope.launch {
             currentIndex++
-            _mangaFlowData.emit(MangaResult.Success(titlesList[currentIndex]))
+            _mangaFlowData.emit(MangaResultState.Success(mangaList[currentIndex]))
         }
     }
 
     private suspend fun loadNextTitle() {
-        _mangaFlowData.emit(MangaResult.Progress)
+        _mangaFlowData.emit(MangaResultState.Progress)
         val result = mangaRepository.loadRandomManga().data
-        titlesList.add(result)
+        mangaList.add(result)
 
     }
 
     fun onBackClick() {
         viewModelScope.launch {
             currentIndex--
-            _mangaFlowData.emit(MangaResult.Success(titlesList[currentIndex]))
+            _mangaFlowData.emit(MangaResultState.Success(mangaList[currentIndex]))
         }
     }
 

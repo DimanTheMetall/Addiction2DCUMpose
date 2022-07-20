@@ -13,9 +13,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.addiction2dcumpose.DI.randomComponent.DaggerRandomComponent
+import com.example.addiction2dcumpose.DI.searchComponent.DaggerSearchComponent
 import com.example.addiction2dcumpose.mvvm.navigate.NavigateScreen
 import com.example.addiction2dcumpose.mvvm.random.RandomScreen
 import com.example.addiction2dcumpose.mvvm.random.RandomViewModel
+import com.example.addiction2dcumpose.mvvm.search.SearchScreen
+import com.example.addiction2dcumpose.mvvm.search.SearchViewModel
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -28,7 +31,15 @@ class MainActivity : AppCompatActivity() {
 
             NavHost(navController = navController, startDestination = "navigate") {
                 composable("navigate") { NavigateScreen(navController = navController).Screen() }
-                composable("search") { }
+                composable("search") {
+                    val searchViewModel = daggerViewModel(viewModelInstanceCreator = {
+                        DaggerSearchComponent.factory()
+                            .create(application.getAsAddiction().addictionComponent).getViewModel()
+                    })
+                    SearchScreen(
+                        viewModel = searchViewModel
+                    ).Screen()
+                }
                 composable("favorite") {}
                 composable("random") {
 
@@ -43,7 +54,6 @@ class MainActivity : AppCompatActivity() {
 
         }
     }
-
 
 
     @Composable
