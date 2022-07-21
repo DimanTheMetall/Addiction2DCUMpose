@@ -12,6 +12,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.addiction2dcumpose.DI.DaggerViewModelCreator
+import com.example.addiction2dcumpose.DI.daggerViewModel
 import com.example.addiction2dcumpose.DI.randomComponent.DaggerRandomComponent
 import com.example.addiction2dcumpose.DI.searchComponent.DaggerSearchComponent
 import com.example.addiction2dcumpose.mvvm.navigate.NavigateScreen
@@ -21,7 +23,7 @@ import com.example.addiction2dcumpose.mvvm.search.SearchScreen
 import com.example.addiction2dcumpose.mvvm.search.SearchViewModel
 import kotlinx.coroutines.launch
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), DaggerViewModelCreator {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,20 +58,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    @Composable
-    private inline fun <reified T : ViewModel> daggerViewModel(
-        key: String? = null,
-        crossinline viewModelInstanceCreator: () -> T
-    ): T =
-        viewModel(
-            modelClass = T::class.java,
-            key = key,
-            factory = object : ViewModelProvider.Factory {
-                override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return viewModelInstanceCreator() as T
-                }
-            }
-        )
+
 
 
 }

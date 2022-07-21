@@ -55,13 +55,20 @@ class RandomViewModel @Inject constructor(private val mangaRepository: MangaRepo
                     getNextTitle()
                 }
                     .onFailure { _mangaFlowData.emit(MangaResultState.Error) }
-
             } else {
                 getNextTitle()
             }
         }
-
     }
+
+    fun onBackClick() {
+        viewModelScope.launch {
+            currentIndex--
+            _mangaFlowData.emit(MangaResultState.Success(mangaList[currentIndex]))
+        }
+    }
+
+
 
     private suspend fun getNextTitle() {
         viewModelScope.launch {
@@ -74,14 +81,6 @@ class RandomViewModel @Inject constructor(private val mangaRepository: MangaRepo
         _mangaFlowData.emit(MangaResultState.Progress)
         val result = mangaRepository.loadRandomManga().data
         mangaList.add(result)
-
-    }
-
-    fun onBackClick() {
-        viewModelScope.launch {
-            currentIndex--
-            _mangaFlowData.emit(MangaResultState.Success(mangaList[currentIndex]))
-        }
     }
 
 

@@ -41,7 +41,7 @@ class SearchScreen(private val viewModel: SearchViewModel) {
                 SearchingList(
                     state = state.value,
                     onValueChanged = { value -> viewModel.onValueChanged(value) },
-                    onIconClicked = {},
+                    onIconClicked = { viewModel.loadNextList() },
                     onPagingScroll = {}
                 )
             }
@@ -57,7 +57,7 @@ fun SearchingList(
     state: SearchMangaState,
     onValueChanged: (String) -> Unit,
     onIconClicked: () -> Unit,
-    onPagingScroll: ()-> Unit
+    onPagingScroll: () -> Unit
 ) {
     val scrollState = rememberLazyListState()
     val onPagingItemScrollStateBoolean = remember {
@@ -103,7 +103,6 @@ fun SearchingList(
                     )
                 }
             )
-            Spacer(modifier = Modifier.size(16.dp))
             if (!state.titlesList.isNullOrEmpty()) LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(
                     8.dp
@@ -114,7 +113,7 @@ fun SearchingList(
                     item {
                         CardItem(
                             mangaData = mangaData,
-                            modifier = Modifier.size(width = 350.dp, height = 160.dp)
+                            modifier = Modifier.size(width = 350.dp, height = 220.dp)
                         )
                     }
                 }

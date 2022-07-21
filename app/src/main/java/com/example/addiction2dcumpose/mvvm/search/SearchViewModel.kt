@@ -26,10 +26,34 @@ class SearchViewModel @Inject constructor(private val mangaRepository: MangaRepo
     )
     val stateFLowData = _stateFlowData.asStateFlow()
 
-    fun onValueChanged(newLetters: String) {
+    fun onValueChanged(searchText: String) {
         viewModelScope.launch {
-            val newSettings = _stateFlowData.value.searchingSettings.copy(letters = newLetters)
+            val newSettings = _stateFlowData.value.searchingSettings.copy(q = searchText)
             _stateFlowData.emit(_stateFlowData.value.copy(searchingSettings = newSettings))
+        }
+    }
+
+    fun loadNextList() {
+        viewModelScope.launch {
+            kotlin.runCatching {
+                val list = mangaRepository.loadMangaList(_stateFlowData.value.searchingSettings)
+                mangaList.addAll(list.mangaData)
+                println("AAA ${mangaList.size}")
+            }
+                .onFailure {
+                    println("AAA $it") }
+                .onSuccess {
+                    val newSettings =
+                        _stateFlowData.value.searchingSettings.copy(page = _stateFlowData.value.searchingSettings.page + 1)
+                    _stateFlowData.emit(
+                        _stateFlowData.value.copy(
+                            searchingSettings = newSettings,
+                            titlesList = mangaList
+                        )
+                    )
+                }
+
+
         }
     }
 
