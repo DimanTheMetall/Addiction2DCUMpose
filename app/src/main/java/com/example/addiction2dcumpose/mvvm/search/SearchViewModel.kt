@@ -6,9 +6,8 @@ import com.example.addiction2dcumpose.States.SearchMangaState
 import com.example.addiction2dcumpose.dataClasses.MangaData
 import com.example.addiction2dcumpose.dataClasses.SearchSettings
 import com.example.addiction2dcumpose.repositories.MangaRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 
@@ -16,46 +15,51 @@ class SearchViewModel @Inject constructor(private val mangaRepository: MangaRepo
     ViewModel() {
 
     private val mangaList = mutableListOf<MangaData>()
-    private val _stateFlowData = MutableStateFlow(
+    private val _screenFlowState = MutableStateFlow(
         SearchMangaState(
-            searchingSettings = SearchSettings(),
-            titlesList = mangaList,
+            titlesList = mutableListOf(),
             isLoading = true,
             haveErrors = false
         )
     )
-    val stateFLowData = _stateFlowData.asStateFlow()
+    private val _settingsFlowState = MutableStateFlow(SearchSettings())
+
+    val settingsFlowState = _settingsFlowState.asStateFlow()
+    val screenFlowState = _screenFlowState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            startCollectSettings()
+        }
+    }
 
     fun onValueChanged(searchText: String) {
         viewModelScope.launch {
-            val newSettings = _stateFlowData.value.searchingSettings.copy(q = searchText)
-            _stateFlowData.emit(_stateFlowData.value.copy(searchingSettings = newSettings))
+            val newSettings = _settingsFlowState.value.copy(q = searchText)
+            _settingsFlowState.emit(newSettings)
         }
     }
 
-    fun loadNextList() {
-        viewModelScope.launch {
-            kotlin.runCatching {
-                val list = mangaRepository.loadMangaList(_stateFlowData.value.searchingSettings)
-                mangaList.addAll(list.mangaData)
-                println("AAA ${mangaList.size}")
+    private suspend fun loadNextListPart(searchSettings: SearchSettings) {
+        try {
+            val receive = withContext(Dispatchers.Default) {
+                mangaRepository.loadMangaList(searchSettings = searchSettings)
             }
-                .onFailure {
-                    println("AAA $it") }
-                .onSuccess {
-                    val newSettings =
-                        _stateFlowData.value.searchingSettings.copy(page = _stateFlowData.value.searchingSettings.page + 1)
-                    _stateFlowData.emit(
-                        _stateFlowData.value.copy(
-                            searchingSettings = newSettings,
-                            titlesList = mangaList
-                        )
-                    )
-                }
-
-
+            mangaList.addAll(receive.mangaData)
+            val newState = _screenFlowState.value.copy(titlesList = mangaList.toMutableList())
+            _screenFlowState.emit(newState)
+        } catch (e: Throwable) {
+            TODO()
         }
     }
 
-
+    private suspend fun startCollectSettings() {
+        _settingsFlowState.collectLatest { searchSettings ->
+            delay(1000)
+            mangaList.clear()
+            loadNextListPart(searchSettings = searchSettings)
+        }
+    }
 }
+
+

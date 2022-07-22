@@ -8,4 +8,7 @@ object Constants {
     const val ON_PAGE_LIMIT = 30
     const val PAGINATION_DIFF = 5
 
+    //LOGS
+    const val ERROR_LOG = "ERROR"
+
 }

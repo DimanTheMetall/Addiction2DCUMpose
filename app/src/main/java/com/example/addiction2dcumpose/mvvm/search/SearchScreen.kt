@@ -34,14 +34,16 @@ class SearchScreen(private val viewModel: SearchViewModel) {
     @Composable
     fun Screen() {
         val navController = rememberNavController()
-        val state = viewModel.stateFLowData.collectAsState()
+        val settingsState = viewModel.settingsFlowState.collectAsState()
+        val screenState = viewModel.screenFlowState.collectAsState()
 
         NavHost(navController = navController, startDestination = "searchList") {
             composable("searchList") {
                 SearchingList(
-                    state = state.value,
+                    screenState = screenState.value,
+                    settingsState = settingsState.value,
                     onValueChanged = { value -> viewModel.onValueChanged(value) },
-                    onIconClicked = { viewModel.loadNextList() },
+                    onIconClicked = {  },
                     onPagingScroll = {}
                 )
             }
@@ -54,7 +56,8 @@ class SearchScreen(private val viewModel: SearchViewModel) {
 
 @Composable
 fun SearchingList(
-    state: SearchMangaState,
+    screenState: SearchMangaState,
+    settingsState: SearchSettings,
     onValueChanged: (String) -> Unit,
     onIconClicked: () -> Unit,
     onPagingScroll: () -> Unit
@@ -62,24 +65,25 @@ fun SearchingList(
     val scrollState = rememberLazyListState()
     val onPagingItemScrollStateBoolean = remember {
         derivedStateOf {
-            if (!state.titlesList.isNullOrEmpty()) {
-                scrollState.firstVisibleItemIndex == state.titlesList.lastIndex - Constants.PAGINATION_DIFF
+            if (!screenState.titlesList.isNullOrEmpty()) {
+                scrollState.firstVisibleItemIndex == screenState.titlesList.lastIndex - Constants.PAGINATION_DIFF
             } else {
                 true
             }
-
         }
     }
+
     if (onPagingItemScrollStateBoolean.value) {
         onPagingScroll.invoke()
     }
+
     Addiction2DTheme {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TextField(
-                value = state.searchingSettings.letters,
+                value = settingsState.q ?: "",
                 onValueChange = { value -> onValueChanged.invoke(value) },
                 shape = RoundedCornerShape(50),
                 modifier = Modifier
@@ -103,13 +107,13 @@ fun SearchingList(
                     )
                 }
             )
-            if (!state.titlesList.isNullOrEmpty()) LazyColumn(
+            if (!screenState.titlesList.isNullOrEmpty()) LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(
                     8.dp
                 ),
                 state = scrollState
             ) {
-                state.titlesList.forEach { mangaData ->
+                screenState.titlesList.forEach { mangaData ->
                     item {
                         CardItem(
                             mangaData = mangaData,
@@ -118,9 +122,10 @@ fun SearchingList(
                     }
                 }
             }
-
         }
+
     }
+
 }
 
 @Composable
@@ -184,12 +189,12 @@ private fun MangaInform(modifier: Modifier = Modifier, mangaData: MangaData) {
 @Composable
 private fun SearchingListPreview() {
     SearchingList(
-        state = SearchMangaState(
-            searchingSettings = SearchSettings(),
+        screenState = SearchMangaState(
             titlesList = MutableList(10) { MangaStubData.mangaData },
             isLoading = true,
             haveErrors = false
         ),
+        settingsState = SearchSettings(),
         onValueChanged = {},
         onIconClicked = {},
         onPagingScroll = {}
