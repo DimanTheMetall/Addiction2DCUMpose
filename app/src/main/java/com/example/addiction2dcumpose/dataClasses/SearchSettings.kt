@@ -11,7 +11,7 @@ data class SearchSettings(
     val minScore: Int? = null,
     val maxScore: Int? = null,
     val status: MangaStatus? = null,
-    val sfw: Boolean = false,
+    val sfw: Boolean = true,
     val genresInclude: List<Genre>? = null,
     val genresExclude: List<Genre>? = null,
     val sort: Sort? = null,
@@ -26,6 +26,10 @@ data class SearchSettings(
 
     fun getExcludeGenresAsString(): String? {
         return genreToString(genresExclude)
+    }
+
+    fun risePage(): SearchSettings {
+        return this.copy(page = page + 1)
     }
 
     private fun genreToString(genreList: List<Genre>?): String? {

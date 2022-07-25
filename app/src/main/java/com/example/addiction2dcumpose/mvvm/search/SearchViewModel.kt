@@ -28,40 +28,78 @@ class SearchViewModel @Inject constructor(private val mangaRepository: MangaRepo
     val settingsFlowState = _settingsFlowState.asStateFlow()
     val screenFlowState = _screenFlowState.asStateFlow()
 
-    init {
+
+    fun onPageScrolled() {
         viewModelScope.launch {
-            startCollectSettings()
+            emmitRisenPage()
+            addNextListPart()
         }
     }
 
-    fun onValueChanged(searchText: String) {
+    fun onTextFieldValueChanged(searchText: String) {
         viewModelScope.launch {
             val newSettings = _settingsFlowState.value.copy(q = searchText)
             _settingsFlowState.emit(newSettings)
+            delay(1000)
+            resetSettingsPage()
+            loadNewList()
         }
     }
 
-    private suspend fun loadNextListPart(searchSettings: SearchSettings) {
+    private suspend fun emmitRisenPage(){
+        _settingsFlowState.emit(_settingsFlowState.value.risePage())
+    }
+
+    private suspend fun loadNewList(){
         _screenFlowState.emit(_screenFlowState.value.copyWithLoading(true))
         try {
             val receive = withContext(Dispatchers.Default) {
-                mangaRepository.loadMangaList(searchSettings = searchSettings)
+                mangaRepository.loadMangaList(searchSettings = _settingsFlowState.value)
             }
+            mangaList.clear()
             mangaList.addAll(receive.mangaData)
-            val newState = _screenFlowState.value.copy(titlesList = mangaList.toMutableList(), isLoading = false)
+            val newState = _screenFlowState.value.copy(
+                titlesList = mangaList.toMutableList(),
+                isLoading = false
+            )
             _screenFlowState.emit(newState)
         } catch (e: Throwable) {
-            TODO()
+            makeError()
         }
     }
 
-    private suspend fun startCollectSettings() {
-        _settingsFlowState.collectLatest { searchSettings ->
-            delay(1000)
-            mangaList.clear()
-            loadNextListPart(searchSettings = searchSettings)
+    private suspend fun makeError () {
+        val currentState = _screenFlowState.value
+        val stateWithError = currentState.copy(haveErrors = true)
+        _screenFlowState.apply {
+            emit(stateWithError)
+            emit(currentState)
         }
     }
+
+    private suspend fun resetSettingsPage(){
+        val newSettings = _settingsFlowState.value.copy(page = 1)
+        _settingsFlowState.emit(newSettings)
+    }
+
+    private suspend fun addNextListPart() {
+        _screenFlowState.emit(_screenFlowState.value.copyWithLoading(true))
+        try {
+            val receive = withContext(Dispatchers.Default) {
+                mangaRepository.loadMangaList(searchSettings = _settingsFlowState.value)
+            }
+            mangaList.addAll(receive.mangaData)
+            val newState = _screenFlowState.value.copy(
+                titlesList = mangaList.toMutableList(),
+                isLoading = false
+            )
+            _screenFlowState.emit(newState)
+        } catch (e: Throwable) {
+            makeError()
+        }
+    }
+
+
 }
 
 

@@ -1,6 +1,5 @@
 package com.example.addiction2dcumpose.mvvm.search
 
-import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -8,7 +7,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,7 +28,6 @@ import com.example.addiction2dcumpose.dataClasses.MangaData
 import com.example.addiction2dcumpose.dataClasses.SearchSettings
 import com.example.rxpractic.ui.theme.Addiction2DTheme
 import com.skydoves.landscapist.CircularReveal
-import kotlin.reflect.KProperty
 
 class SearchScreen(private val viewModel: SearchViewModel) {
 
@@ -45,9 +42,9 @@ class SearchScreen(private val viewModel: SearchViewModel) {
                 SearchingList(
                     screenState = screenState.value,
                     settingsState = settingsState.value,
-                    onValueChanged = { value -> viewModel.onValueChanged(value) },
+                    onValueChanged = { value -> viewModel.onTextFieldValueChanged(value) },
                     onIconClicked = { },
-                    onPagingScroll = { println("AAA scroll") }
+                    onPagingScroll = { viewModel.onPageScrolled() }
                 )
             }
             composable("MangaSettings") {}

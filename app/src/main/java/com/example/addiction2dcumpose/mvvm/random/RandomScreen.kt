@@ -185,9 +185,7 @@ private fun SuccessResultScreen(
                 borderStroke = cardBorder
             )
         }
-
     }
-
 }
 
 
@@ -243,8 +241,6 @@ private fun TwoButtons(
     state: RandomScreenButtonState,
     verticalAlignment: Alignment.Vertical
 ) {
-
-
     Addiction2DTheme {
         val buttonsModifier = Modifier
             .size(40.dp)
