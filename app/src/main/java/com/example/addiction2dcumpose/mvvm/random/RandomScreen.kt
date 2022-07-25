@@ -43,22 +43,23 @@ class RandomScreen(val viewModel: RandomViewModel) : BaseScreen() {
             is MangaResultState.Success -> {
                 SuccessResultScreen(
                     mangaData = (state.value as MangaResultState.Success).mangaData,
-                    onBackClick = { viewModel.onBackClick() },
-                    onNextClick = { viewModel.onNextCLick() },
                     buttonState = buttonsState.value
                 )
             }
             MangaResultState.Error -> {
-                OnErrorScreen(
-                    onNextClick = { viewModel.onNextCLick() },
-                    onBackClick = { viewModel.onBackClick() },
-                    buttonState = buttonsState.value
-                )
+                OnErrorScreen()
             }
             MangaResultState.Progress -> {
                 OnLoadingScreen()
             }
         }
+        TwoButtons(
+            onNextClick = { viewModel.onNextCLick() },
+            onBackClick = { viewModel.onBackClick() },
+            state = buttonsState.value,
+            verticalAlignment =Alignment.Bottom,
+            modifier = Modifier.fillMaxSize()
+        )
 
     }
 }
@@ -77,9 +78,6 @@ private fun OnLoadingScreen() {
 
 @Composable
 private fun OnErrorScreen(
-    onNextClick: () -> Unit,
-    onBackClick: () -> Unit,
-    buttonState: RandomScreenButtonState
 ) {
     Addiction2DTheme {
         Column(
@@ -114,24 +112,12 @@ private fun OnErrorScreen(
 
             }
         }
-        TwoButtons(
-            onNextClick = onNextClick,
-            onBackClick = onBackClick,
-            state = buttonState,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 20.dp),
-            verticalAlignment = Alignment.Bottom
-        )
-
     }
 }
 
 @Composable
 private fun SuccessResultScreen(
     mangaData: MangaData,
-    onBackClick: () -> Unit,
-    onNextClick: () -> Unit,
     buttonState: RandomScreenButtonState
 ) {
     val scrollState = rememberScrollState()
@@ -199,15 +185,6 @@ private fun SuccessResultScreen(
                 borderStroke = cardBorder
             )
         }
-        if (!isScrolling) TwoButtons(
-            onNextClick = { onNextClick.invoke() },
-            onBackClick = { onBackClick.invoke() },
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 20.dp),
-            state = buttonState,
-            verticalAlignment = Alignment.Bottom
-        )
 
     }
 
@@ -266,42 +243,44 @@ private fun TwoButtons(
     state: RandomScreenButtonState,
     verticalAlignment: Alignment.Vertical
 ) {
-    val buttonsModifier = Modifier
-        .size(40.dp)
-        .background(color = MaterialTheme.colors.primary, shape = CircleShape)
 
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = verticalAlignment,
-    ) {
-        AnimatedVisibility(visible = state.isBackButtonActive) {
-            FloatingActionButton(
-                onClick = onBackClick,
-                modifier = buttonsModifier,
-                backgroundColor = MaterialTheme.colors.background
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_forward),
-                    contentDescription = null,
-                    modifier = Modifier.rotate(180f)
-                )
+
+    Addiction2DTheme {
+        val buttonsModifier = Modifier
+            .size(40.dp)
+            .background(color = MaterialTheme.colors.primary, shape = CircleShape)
+        Row(
+            modifier = modifier,
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = verticalAlignment,
+        ) {
+            AnimatedVisibility(visible = state.isBackButtonActive) {
+                FloatingActionButton(
+                    onClick = onBackClick,
+                    modifier = buttonsModifier,
+                    backgroundColor = MaterialTheme.colors.background
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_forward),
+                        contentDescription = null,
+                        modifier = Modifier.rotate(180f)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.size(80.dp))
+            AnimatedVisibility(visible = state.isNextButtonActive) {
+                FloatingActionButton(
+                    onClick = onNextClick,
+                    modifier = buttonsModifier,
+                    backgroundColor = MaterialTheme.colors.background
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_forward),
+                        contentDescription = null
+                    )
+                }
             }
         }
-        AnimatedVisibility(visible = state.isNextButtonActive) {
-            FloatingActionButton(
-                onClick = onNextClick,
-                modifier = buttonsModifier,
-                backgroundColor = MaterialTheme.colors.background
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_forward),
-                    contentDescription = null
-                )
-            }
-        }
-
-
     }
 }
 
@@ -438,8 +417,6 @@ private fun ImageTitleCard(
 private fun OnSuccessScreenPreview() {
     SuccessResultScreen(
         mangaData = mangaData,
-        onBackClick = { /*TODO*/ },
-        onNextClick = { TODO() },
         buttonState = RandomScreenButtonState(
             isBackButtonActive = false,
             isNextButtonActive = false
@@ -451,14 +428,7 @@ private fun OnSuccessScreenPreview() {
 @Composable
 private fun OnErrorScreenPreview() {
     Addiction2DTheme {
-        OnErrorScreen(
-            onNextClick = { },
-            onBackClick = { },
-            buttonState = RandomScreenButtonState(
-                isBackButtonActive = true,
-                isNextButtonActive = true
-            )
-        )
+        OnErrorScreen()
     }
 
 }
