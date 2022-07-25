@@ -10,8 +10,6 @@ class AddictionApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-
         addictionComponent = DaggerAddictionComponent.factory().create(applicationContext)
-
     }
 }

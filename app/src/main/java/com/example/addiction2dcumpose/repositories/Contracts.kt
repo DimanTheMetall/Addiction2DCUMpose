@@ -13,3 +13,5 @@ interface MangaRepository {
     suspend fun loadMangaList(searchSettings: SearchSettings):MangaListReceive
 
 }
+
+interface GenreRepository

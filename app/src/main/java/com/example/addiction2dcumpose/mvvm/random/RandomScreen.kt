@@ -42,8 +42,7 @@ class RandomScreen(val viewModel: RandomViewModel) : BaseScreen() {
         when (state.value) {
             is MangaResultState.Success -> {
                 SuccessResultScreen(
-                    mangaData = (state.value as MangaResultState.Success).mangaData,
-                    buttonState = buttonsState.value
+                    mangaData = (state.value as MangaResultState.Success).mangaData
                 )
             }
             MangaResultState.Error -> {
@@ -58,7 +57,9 @@ class RandomScreen(val viewModel: RandomViewModel) : BaseScreen() {
             onBackClick = { viewModel.onBackClick() },
             state = buttonsState.value,
             verticalAlignment =Alignment.Bottom,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 10.dp)
         )
 
     }
@@ -118,10 +119,8 @@ private fun OnErrorScreen(
 @Composable
 private fun SuccessResultScreen(
     mangaData: MangaData,
-    buttonState: RandomScreenButtonState
 ) {
     val scrollState = rememberScrollState()
-    val isScrolling = scrollState.isScrollInProgress
     val cardsWidth = 340.dp
     val cardShape = RoundedCornerShape(18.dp)
 
@@ -153,19 +152,46 @@ private fun SuccessResultScreen(
                     borderStroke = cardBorder,
                     title = stringResource(id = R.string.genres)
                 )
+                Spacer(modifier = Modifier.size(space))
             }
-            Spacer(modifier = Modifier.size(space))
-            if (!mangaData.authors.isNullOrEmpty()) ItemsCard(
-                itemsList = mangaData.authors,
-                shape = cardShape,
-                borderStroke = cardBorder,
-                modifier = Modifier
-                    .width(cardsWidth)
-                    .wrapContentSize(),
-                title = stringResource(id = R.string.authors)
 
-            )
-            Spacer(modifier = Modifier.size(space))
+            if (!mangaData.themes.isNullOrEmpty()){
+                ItemsCard(
+                    itemsList = mangaData.themes,
+                    shape = cardShape,
+                    modifier = Modifier
+                        .width(cardsWidth)
+                        .wrapContentSize(),
+                    borderStroke = cardBorder,
+                    title = stringResource(id = R.string.themes)
+                )
+                Spacer(modifier = Modifier.size(space))
+            }
+            if (!mangaData.serializations.isNullOrEmpty()){
+                ItemsCard(
+                    itemsList = mangaData.serializations,
+                    shape = cardShape,
+                    modifier = Modifier
+                        .width(cardsWidth)
+                        .wrapContentSize(),
+                    borderStroke = cardBorder,
+                    title = stringResource(id = R.string.serializations)
+                )
+                Spacer(modifier = Modifier.size(space))
+            }
+            if (!mangaData.authors.isNullOrEmpty()) {
+                ItemsCard(
+                    itemsList = mangaData.authors,
+                    shape = cardShape,
+                    borderStroke = cardBorder,
+                    modifier = Modifier
+                        .width(cardsWidth)
+                        .wrapContentSize(),
+                    title = stringResource(id = R.string.authors)
+
+                )
+                Spacer(modifier = Modifier.size(space))
+            }
             MangaInfoCard(
                 mangaData = mangaData,
                 style = MaterialTheme.typography.h6,
@@ -413,10 +439,6 @@ private fun ImageTitleCard(
 private fun OnSuccessScreenPreview() {
     SuccessResultScreen(
         mangaData = mangaData,
-        buttonState = RandomScreenButtonState(
-            isBackButtonActive = false,
-            isNextButtonActive = false
-        )
     )
 }
 

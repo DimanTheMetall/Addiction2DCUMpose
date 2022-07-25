@@ -11,7 +11,7 @@ data class SearchSettings(
     val minScore: Int? = null,
     val maxScore: Int? = null,
     val status: MangaStatus? = null,
-    val sfw: Boolean = true,
+    val sfw: Boolean = false,
     val genresInclude: List<Genre>? = null,
     val genresExclude: List<Genre>? = null,
     val sort: Sort? = null,

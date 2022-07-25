@@ -22,6 +22,11 @@ enum class Sort(val sortName: String){
     DESC("desc"), ASC("asc")
 }
 
+enum class GenresFilter(val filterName: String) {
+    GENRES("genres"), EXPLICIT_GENRES("explicit_genres"), THEMES("themes"),
+    DEMOGRAPHICS("demographics")
+}
+
 
 
 

@@ -36,6 +36,13 @@ class SearchViewModel @Inject constructor(private val mangaRepository: MangaRepo
         }
     }
 
+    fun changeSettings(searchSettings: SearchSettings){
+        viewModelScope.launch {
+            _settingsFlowState.emit(searchSettings)
+            loadNewList()
+        }
+    }
+
     fun onTextFieldValueChanged(searchText: String) {
         viewModelScope.launch {
             val newSettings = _settingsFlowState.value.copy(q = searchText)
@@ -48,24 +55,6 @@ class SearchViewModel @Inject constructor(private val mangaRepository: MangaRepo
 
     private suspend fun emmitRisenPage(){
         _settingsFlowState.emit(_settingsFlowState.value.risePage())
-    }
-
-    private suspend fun loadNewList(){
-        _screenFlowState.emit(_screenFlowState.value.copyWithLoading(true))
-        try {
-            val receive = withContext(Dispatchers.Default) {
-                mangaRepository.loadMangaList(searchSettings = _settingsFlowState.value)
-            }
-            mangaList.clear()
-            mangaList.addAll(receive.mangaData)
-            val newState = _screenFlowState.value.copy(
-                titlesList = mangaList.toMutableList(),
-                isLoading = false
-            )
-            _screenFlowState.emit(newState)
-        } catch (e: Throwable) {
-            makeError()
-        }
     }
 
     private suspend fun makeError () {
@@ -88,6 +77,24 @@ class SearchViewModel @Inject constructor(private val mangaRepository: MangaRepo
             val receive = withContext(Dispatchers.Default) {
                 mangaRepository.loadMangaList(searchSettings = _settingsFlowState.value)
             }
+            mangaList.addAll(receive.mangaData)
+            val newState = _screenFlowState.value.copy(
+                titlesList = mangaList.toMutableList(),
+                isLoading = false
+            )
+            _screenFlowState.emit(newState)
+        } catch (e: Throwable) {
+            makeError()
+        }
+    }
+
+    private suspend fun loadNewList(){
+        _screenFlowState.emit(_screenFlowState.value.copyWithLoading(true))
+        try {
+            val receive = withContext(Dispatchers.Default) {
+                mangaRepository.loadMangaList(searchSettings = _settingsFlowState.value)
+            }
+            mangaList.clear()
             mangaList.addAll(receive.mangaData)
             val newState = _screenFlowState.value.copy(
                 titlesList = mangaList.toMutableList(),

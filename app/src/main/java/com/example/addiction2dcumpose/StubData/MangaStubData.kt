@@ -22,7 +22,9 @@ object MangaStubData {
             MangaItemReceive(id = 12, name = "Hentai"),
             MangaItemReceive(id = 10, name = "Something")
         ),
-        authors = listOf(MangaItemReceive(id = 2, name = "Ivan, Ivanov"))
+        authors = listOf(MangaItemReceive(id = 2, name = "Ivan, Ivanov")),
+        serializations = null,
+        themes = null
     )
 
 

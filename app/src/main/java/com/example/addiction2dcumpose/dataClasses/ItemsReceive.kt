@@ -6,7 +6,7 @@ class MangaItemReceive(
     @SerializedName("mal_id")
     val id: Long,
     @SerializedName("name")
-    val name: String?
+    val name: String
 )
 
 
