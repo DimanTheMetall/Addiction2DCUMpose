@@ -19,7 +19,8 @@ class SearchViewModel @Inject constructor(private val mangaRepository: MangaRepo
         SearchMangaState(
             titlesList = mutableListOf(),
             isLoading = true,
-            haveErrors = false
+            haveErrors = false,
+            isPageLast = false
         )
     )
     private val _settingsFlowState = MutableStateFlow(SearchSettings())
@@ -41,12 +42,13 @@ class SearchViewModel @Inject constructor(private val mangaRepository: MangaRepo
     }
 
     private suspend fun loadNextListPart(searchSettings: SearchSettings) {
+        _screenFlowState.emit(_screenFlowState.value.copyWithLoading(true))
         try {
             val receive = withContext(Dispatchers.Default) {
                 mangaRepository.loadMangaList(searchSettings = searchSettings)
             }
             mangaList.addAll(receive.mangaData)
-            val newState = _screenFlowState.value.copy(titlesList = mangaList.toMutableList())
+            val newState = _screenFlowState.value.copy(titlesList = mangaList.toMutableList(), isLoading = false)
             _screenFlowState.emit(newState)
         } catch (e: Throwable) {
             TODO()

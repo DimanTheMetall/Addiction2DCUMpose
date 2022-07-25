@@ -1,5 +1,6 @@
 package com.example.addiction2dcumpose.mvvm.search
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,6 +30,7 @@ import com.example.addiction2dcumpose.dataClasses.MangaData
 import com.example.addiction2dcumpose.dataClasses.SearchSettings
 import com.example.rxpractic.ui.theme.Addiction2DTheme
 import com.skydoves.landscapist.CircularReveal
+import kotlin.reflect.KProperty
 
 class SearchScreen(private val viewModel: SearchViewModel) {
 
@@ -43,8 +46,8 @@ class SearchScreen(private val viewModel: SearchViewModel) {
                     screenState = screenState.value,
                     settingsState = settingsState.value,
                     onValueChanged = { value -> viewModel.onValueChanged(value) },
-                    onIconClicked = {  },
-                    onPagingScroll = {}
+                    onIconClicked = { },
+                    onPagingScroll = { println("AAA scroll") }
                 )
             }
             composable("MangaSettings") {}
@@ -63,17 +66,12 @@ fun SearchingList(
     onPagingScroll: () -> Unit
 ) {
     val scrollState = rememberLazyListState()
-    val onPagingItemScrollStateBoolean = remember {
-        derivedStateOf {
-            if (!screenState.titlesList.isNullOrEmpty()) {
-                scrollState.firstVisibleItemIndex == screenState.titlesList.lastIndex - Constants.PAGINATION_DIFF
-            } else {
-                true
-            }
-        }
-    }
+    val onPagingItemScrollStateBoolean by rememberUpdatedState(newValue = derivedStateOf {
+        scrollState.firstVisibleItemIndex == (screenState.titlesList?.lastIndex
+            ?: 0) - Constants.PAGINATION_DIFF
+    })
 
-    if (onPagingItemScrollStateBoolean.value) {
+    if (onPagingItemScrollStateBoolean.value && !screenState.isLoading && !screenState.isPageLast) {
         onPagingScroll.invoke()
     }
 
@@ -122,6 +120,12 @@ fun SearchingList(
                     }
                 }
             }
+        }
+        if (screenState.isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
+                CircularProgressIndicator(modifier = Modifier.size(40.dp))
+            }
+
         }
 
     }
@@ -192,7 +196,9 @@ private fun SearchingListPreview() {
         screenState = SearchMangaState(
             titlesList = MutableList(10) { MangaStubData.mangaData },
             isLoading = true,
-            haveErrors = false
+            haveErrors = false,
+            //FIXME
+            isPageLast = false
         ),
         settingsState = SearchSettings(),
         onValueChanged = {},

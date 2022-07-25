@@ -1,10 +1,12 @@
 package com.example.addiction2dcumpose.mvvm.random
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.SnackbarDefaults.backgroundColor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -271,29 +273,34 @@ private fun TwoButtons(
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = verticalAlignment
+        verticalAlignment = verticalAlignment,
     ) {
-        FloatingActionButton(
-            onClick = onBackClick,
-            modifier = if (state.isBackButtonActive) buttonsModifier else Modifier.size(0.dp),
-            backgroundColor = MaterialTheme.colors.background
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_forward),
-                contentDescription = null,
-                modifier = Modifier.rotate(180f)
-            )
+        AnimatedVisibility(visible = state.isBackButtonActive) {
+            FloatingActionButton(
+                onClick = onBackClick,
+                modifier = buttonsModifier,
+                backgroundColor = MaterialTheme.colors.background
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_forward),
+                    contentDescription = null,
+                    modifier = Modifier.rotate(180f)
+                )
+            }
         }
-        FloatingActionButton(
-            onClick = onNextClick,
-            modifier = if (state.isNextButtonActive) buttonsModifier else Modifier.size(0.dp),
-            backgroundColor = MaterialTheme.colors.background
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_forward),
-                contentDescription = null
-            )
+        AnimatedVisibility(visible = state.isNextButtonActive) {
+            FloatingActionButton(
+                onClick = onNextClick,
+                modifier = buttonsModifier,
+                backgroundColor = MaterialTheme.colors.background
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_forward),
+                    contentDescription = null
+                )
+            }
         }
+
 
     }
 }
