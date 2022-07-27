@@ -1,6 +1,7 @@
 package com.example.rxpractic.ui.theme
 
 import androidx.compose.ui.graphics.Color
+import com.example.addiction2dcumpose.R
 
 val Purple200 = Color(0xFFBB86FC)
 val Purple500 = Color(0xFF6200EE)
@@ -14,3 +15,4 @@ val Chartreuse = Color(0xFFEFF7CF)
 
 val Pink = Color(0xFFE91E63)
 val WhitePink = Color(0xFFF891B4)
+val WhitePink2 = Color(0xFFFFC5F5)

@@ -110,7 +110,6 @@ private fun OnErrorScreen(
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.h5
                 )
-
             }
         }
     }
@@ -251,7 +250,7 @@ private fun ItemsCard(
 private fun TextItem(modifier: Modifier = Modifier, string: String) {
     Card(
         modifier = modifier.padding(6.dp),
-        backgroundColor = MaterialTheme.colors.background,
+        backgroundColor = MaterialTheme.colors.primary,
         shape = RoundedCornerShape(8.dp)
     ) {
         Text(text = string, modifier = Modifier.padding(4.dp))

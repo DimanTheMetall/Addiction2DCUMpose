@@ -1,7 +1,5 @@
 package com.example.addiction2dcumpose.mvvm.search
 
-import android.app.Activity
-import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
@@ -25,7 +23,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.example.addiction2dcumpose.Constants
 import com.example.addiction2dcumpose.DI.DaggerViewModelCreator
@@ -61,14 +58,18 @@ class SearchScreen(private val viewModel: SearchViewModel) : DaggerViewModelCrea
                 )
             }
             composable("MangaSettings") {
-//                val settingsViewModel = daggerViewModel {
-//                    DaggerSettingsComponent.factory()
-//                        .create(LocalContext.current.findActivity().application.getAsAddiction().addictionComponent)
-//                        .getViewModel()
-//                }
-//                SettingsScreen(viewModel = settingsViewModel).Screen(onSettingsChanged = { newSettings ->
-//                    viewModel.changeSettings(newSettings)
-//                })
+                val activity = LocalContext.current.findActivity()
+                val settingsViewModel = daggerViewModel {
+                    DaggerSettingsComponent.factory()
+                        .create(activity.application.getAsAddiction().addictionComponent)
+                        .getViewModel()
+                }
+                SettingsScreen(
+                    viewModel = settingsViewModel,
+                    settings = settingsState.value
+                ).Screen(onSettingsChanged = { newSettings ->
+                    viewModel.changeSettings(newSettings)
+                })
             }
             composable("moreInfo") {}
         }
@@ -223,7 +224,7 @@ private fun MangaInform(modifier: Modifier = Modifier, mangaData: MangaData) {
 private fun TextItem(modifier: Modifier = Modifier, string: String) {
     Card(
         modifier = modifier.padding(6.dp),
-        backgroundColor = MaterialTheme.colors.background,
+        backgroundColor = MaterialTheme.colors.primary,
         shape = RoundedCornerShape(8.dp)
     ) {
         Text(text = string, modifier = Modifier.padding(4.dp))

@@ -70,7 +70,7 @@ class NavigateScreen(private val navController: NavController): BaseScreen() {
         OutlinedButton(
             modifier = modifier.size(width = 310.dp, height = 140.dp),
             onClick = onClick,
-            border = BorderStroke(2.dp, Color.Red),
+            border = BorderStroke(2.dp, MaterialTheme.colors.primary),
             shape = RoundedCornerShape(corner = CornerSize(20.dp))
         ) {
             Text(text = stringResource(id = title), style = MaterialTheme.typography.h4)
