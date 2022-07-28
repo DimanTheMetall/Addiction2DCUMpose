@@ -14,6 +14,7 @@
     <string name="serializations">Serializations</string>
     <string name="some_error" translatable="false">Some error happend, please check internet connection or write to Резиденция Козловых</string>
     <string name="authors">Authors</string>
+    <string name="genres_settings">Genres settings</string>
 
     <string name="toast_error">Some error happened, pls check internet connection</string>
 

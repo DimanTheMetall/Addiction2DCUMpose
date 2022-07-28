@@ -1,5 +1,6 @@
 package com.example.addiction2dcumpose.mvvm.settings
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -11,11 +12,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.addiction2dcumpose.R
 import com.example.addiction2dcumpose.dataClasses.*
 import com.example.rxpractic.ui.theme.Addiction2DTheme
+import com.example.rxpractic.ui.theme.Shapes
 
 class SettingsScreen(private val viewModel: SettingsViewModel, settings: SearchSettings) {
 
@@ -30,7 +36,8 @@ class SettingsScreen(private val viewModel: SettingsViewModel, settings: SearchS
             state = settingsState.value,
             onTypeChanged = { viewModel.onTypeChanged(it) },
             onStatusChanged = { viewModel.onStatusChanged(it) },
-            onOrderByChanged = { viewModel.onOrderByChanged(it)}
+            onOrderByChanged = { viewModel.onOrderByChanged(it) },
+            onSortChanged = { viewModel.onSortChanged(it) }
         )
     }
 
@@ -41,9 +48,11 @@ private fun Settings(
     state: SearchSettings,
     onTypeChanged: (SettingsType) -> Unit,
     onStatusChanged: (SettingsType) -> Unit,
-    onOrderByChanged: (SettingsType) -> Unit
+    onOrderByChanged: (SettingsType) -> Unit,
+    onSortChanged: (SettingsType) -> Unit
 ) {
-    val spacerModifier = Modifier.height(12.dp)
+    val screenWidth = LocalConfiguration.current.screenWidthDp
+    val spacerModifier = Modifier.height(16.dp)
     Addiction2DTheme {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -51,10 +60,11 @@ private fun Settings(
         ) {
             Spacer(modifier = spacerModifier)
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 10.dp, end = 10.dp),
             ) {
-                Column {
+                Column(Modifier.width((screenWidth / 2).dp)) {
                     RowItems(
                         type = state.type,
                         onValueChanged = { onTypeChanged.invoke(it) },
@@ -64,19 +74,31 @@ private fun Settings(
                     Spacer(modifier = spacerModifier)
                     RowItems(
                         type = state.orderBy,
-                        onValueChanged = { onTypeChanged.invoke(it) },
+                        onValueChanged = { onOrderByChanged.invoke(it) },
                         list = OrderBy.values()
                     )
                 }
-                Column {
+                Column(Modifier.width((screenWidth / 2).dp)) {
                     RowItems(
                         type = state.status,
                         onValueChanged = { onStatusChanged.invoke(it) },
                         list = MangaStatus.values(),
                     )
                     Spacer(modifier = spacerModifier)
+                    RowItems(
+                        type = state.sort,
+                        onValueChanged = { onSortChanged.invoke(it) },
+                        list = Sort.values()
+                    )
                 }
             }
+            Spacer(modifier = spacerModifier)
+            Text(
+                text = stringResource(id = R.string.genres_settings),
+                style = MaterialTheme.typography.h5,
+                color = MaterialTheme.colors.primary
+            )
+            Spacer(modifier = Modifier.height(26.dp))
 
 
         }
@@ -92,9 +114,8 @@ private fun <T : SettingsType> RowItems(
     list: Array<T>
 ) {
     val textStyle = MaterialTheme.typography.h6
-    Row(modifier = modifier) {
+    Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         Text(text = list[0].getTypeName(), style = textStyle, color = MaterialTheme.colors.primary)
-        Spacer(modifier = Modifier.width(20.dp))
         TextDropMenu(
             currentItem = type,
             list = list,
@@ -111,7 +132,6 @@ private fun <T : SettingsType> TextDropMenu(
     textStyle: TextStyle = TextStyle()
 ) {
     val state = remember { mutableStateOf(false) }
-
 
     Row(modifier = Modifier.clickable { state.value = !state.value }) {
         Text(
@@ -155,6 +175,7 @@ private fun SettingsScreenPreview() {
         state = SearchSettings(),
         onTypeChanged = { },
         onStatusChanged = { },
-        onOrderByChanged = { })
+        onOrderByChanged = { },
+        onSortChanged = {})
 }
 

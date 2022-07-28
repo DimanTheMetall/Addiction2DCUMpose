@@ -44,6 +44,14 @@ class SettingsViewModel @Inject constructor(genreRepository: GenreRepository): V
         }
     }
 
+    fun onSortChanged(type: SettingsType){
+        if (type !is Sort) throw IllegalStateException("type is not Sort")
+        viewModelScope.launch {
+            val newSettings = _settingsFlow.value.copy(sort = type)
+            _settingsFlow.emit(newSettings)
+        }
+    }
+
 
 
 
