@@ -54,20 +54,22 @@ class SettingsScreen(private val viewModel: SettingsViewModel, settings: SearchS
                     onItemClick = { viewModel.onGenresClick(it) },
                     event = bottomsSheetUi.value
                 )
-            }, scaffoldState = bottomSheetScaffoldState, sheetPeekHeight = 0.dp ) { paddingValues ->
+            }, scaffoldState = bottomSheetScaffoldState, sheetPeekHeight = 0.dp) { paddingValues ->
                 Settings(
                     state = settingsState.value,
                     onTypeChanged = { viewModel.onTypeChanged(it) },
                     onStatusChanged = { viewModel.onStatusChanged(it) },
                     onOrderByChanged = { viewModel.onOrderByChanged(it) },
                     onSortChanged = { viewModel.onSortChanged(it) },
-                    onGenresIncludeIconCLick = { coroutineScope.launch {
-                        bottomSheetScaffoldState.bottomSheetState.expand()
-                    } }
+                    onGenresIncludeIconCLick = {
+                        coroutineScope.launch {
+                            viewModel.onBottomsSheetOpen(true)
+                            bottomSheetScaffoldState.bottomSheetState.expand()
+                        }
+                    }
                 )
             }
         }
-
 
 
     }
@@ -174,7 +176,7 @@ private fun Settings(
                 color = MaterialTheme.colors.primary
             )
             Spacer(modifier = Modifier.height(26.dp))
-            GenresTextField(state = state, onGenresIconCLick = {
+            GenresTextField(state = state, modifier = Modifier.fillMaxWidth(), onGenresIconCLick = {
                 onGenresIncludeIconCLick.invoke()
             }) {
 
@@ -284,7 +286,7 @@ private fun GenresColumn(
             GenresClassCard(stringRes = R.string.genres)
         })
 
-        event.genres.forEach { genre ->
+        event.genres?.forEach { genre ->
             item {
                 GenreCard(
                     genre = genre,
@@ -298,7 +300,7 @@ private fun GenresColumn(
             GenresClassCard(stringRes = R.string.explicit_genres)
         })
 
-        event.explicitGenres.forEach { genre ->
+        event.explicitGenres?.forEach { genre ->
             item {
                 GenreCard(
                     genre = genre,
@@ -312,7 +314,7 @@ private fun GenresColumn(
             GenresClassCard(stringRes = R.string.themes)
         })
 
-        event.themes.forEach { genre ->
+        event.themes?.forEach { genre ->
             item {
                 GenreCard(
                     genre = genre,
@@ -326,7 +328,7 @@ private fun GenresColumn(
             GenresClassCard(stringRes = R.string.demographics)
         })
 
-        event.demographics.forEach { genre ->
+        event.demographics?.forEach { genre ->
             item {
                 GenreCard(
                     genre = genre,

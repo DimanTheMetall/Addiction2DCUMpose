@@ -1,12 +1,13 @@
 package com.example.addiction2dcumpose.RetrofitService
 
-import com.example.addiction2dcumpose.dataClasses.MangaListReceive
-import com.example.addiction2dcumpose.dataClasses.MangaReceive
-import com.example.addiction2dcumpose.dataClasses.SearchSettings
+import com.example.addiction2dcumpose.dataClasses.*
 import retrofit2.http.GET
 import retrofit2.http.Query
 
 interface RetrofitService {
+
+    @GET("genres/manga")
+    suspend fun loadGenres(@Query("filter") filter: String): GenresReceive
 
     @GET("random/manga")
     suspend fun loadRandomManga(): MangaReceive

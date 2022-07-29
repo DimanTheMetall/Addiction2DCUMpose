@@ -5,10 +5,10 @@ import com.example.addiction2dcumpose.dataClasses.Genre
 sealed class SettingsScreenBottomSheetEvent {
     object Loading : SettingsScreenBottomSheetEvent()
     class LoadingComplete(
-        val genres: List<Genre>,
-        val explicitGenres: List<Genre>,
-        val themes: List<Genre>,
-        val demographics: List<Genre>
+        val genres: List<Genre>?,
+        val explicitGenres: List<Genre>?,
+        val themes: List<Genre>?,
+        val demographics: List<Genre>?
     ) : SettingsScreenBottomSheetEvent()
 
 }
