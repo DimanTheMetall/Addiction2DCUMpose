@@ -1,6 +1,5 @@
 package com.example.rxpractic.ui.theme
 
-import androidx.annotation.ColorRes
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
@@ -19,9 +18,9 @@ private val LightColorPalette = lightColors(
     surface = Color.White,
     onSurface = Pink,
     primary = Pink,
-    onPrimary = Color.White ,
-    primaryVariant = Purple700,
-    secondary = Teal200,
+    onPrimary = Color.White,
+    primaryVariant = WhitePink,
+    secondary = WhitePink2,
 
     /* Other default colors to override
     background = Color.White,

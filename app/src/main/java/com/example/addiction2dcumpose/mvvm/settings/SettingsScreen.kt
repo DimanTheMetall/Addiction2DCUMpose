@@ -14,10 +14,13 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.addiction2dcumpose.R
@@ -50,7 +53,7 @@ class SettingsScreen(private val viewModel: SettingsViewModel, settings: SearchS
                 BottomsSheetContent(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(460.dp),
+                        .height(300.dp),
                     onItemClick = { viewModel.onGenresClick(it) },
                     event = bottomsSheetUi.value
                 )
@@ -255,19 +258,26 @@ private fun BottomsSheetContent(
     onItemClick: (Genre) -> Unit,
     event: SettingsScreenBottomSheetEvent
 ) {
-
-    when (event) {
-        is SettingsScreenBottomSheetEvent.Loading -> {
-            CircularProgressIndicator(modifier = modifier)
-        }
-        is SettingsScreenBottomSheetEvent.LoadingComplete -> {
-            GenresColumn(
-                event = event,
-                modifier = modifier,
-                onGenresClick = { onItemClick.invoke(it) })
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        Spacer(modifier = Modifier.size(16.dp))
+        Card(
+            modifier = Modifier.size(width = 120.dp, height = 10.dp),
+            backgroundColor = MaterialTheme.colors.primary
+        ) { }
+        when (event) {
+            is SettingsScreenBottomSheetEvent.Loading -> {
+                Spacer(modifier = Modifier.size(30.dp))
+                CircularProgressIndicator(modifier = Modifier.size(60.dp))
+            }
+            is SettingsScreenBottomSheetEvent.LoadingComplete -> {
+                GenresColumn(
+                    event = event,
+                    onGenresClick = { onItemClick.invoke(it) })
+            }
         }
     }
 }
+
 
 @Composable
 private fun GenresColumn(
@@ -277,8 +287,8 @@ private fun GenresColumn(
 ) {
     LazyVerticalGrid(
         modifier = modifier,
-        contentPadding = PaddingValues(10.dp),
-        columns = GridCells.Fixed(3)
+        contentPadding = PaddingValues(12.dp),
+        columns = GridCells.Fixed(3),
     ) {
         item(span = {
             GridItemSpan(maxLineSpan)
@@ -341,15 +351,19 @@ private fun GenresColumn(
 
 @Composable
 private fun GenresClassCard(@StringRes stringRes: Int, modifier: Modifier = Modifier) {
-    Card(modifier = modifier) {
-        Text(text = stringResource(id = stringRes))
+    Card(modifier = modifier, backgroundColor = MaterialTheme.colors.primary) {
+        Text(
+            text = stringResource(id = stringRes),
+            style = MaterialTheme.typography.h5,
+            textAlign = TextAlign.Center
+        )
     }
 }
 
 @Composable
 private fun GenreCard(modifier: Modifier = Modifier, genre: Genre) {
-    Card(modifier = modifier) {
-        Text(text = genre.name)
+    Card(modifier = modifier.padding(4.dp), backgroundColor = MaterialTheme.colors.primaryVariant) {
+        Text(text = genre.name, textAlign = TextAlign.Center)
     }
 }
 

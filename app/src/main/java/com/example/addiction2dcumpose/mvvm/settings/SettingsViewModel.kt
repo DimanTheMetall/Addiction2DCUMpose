@@ -9,6 +9,7 @@ import com.example.addiction2dcumpose.repositories.GenreRepository
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import javax.inject.Inject
 
 class SettingsViewModel @Inject constructor(val genreRepository: GenreRepository) : ViewModel() {
@@ -20,11 +21,19 @@ class SettingsViewModel @Inject constructor(val genreRepository: GenreRepository
         MutableStateFlow<SettingsScreenBottomSheetEvent>(SettingsScreenBottomSheetEvent.Loading)
     val bottomSheetEvents = _bottomSheetEvents.asStateFlow()
 
-    private var addInIncludeGenres = true
+    private var isAddInIncludeGenres = true
 
     fun onInitScreen(settings: SearchSettings) {
         viewModelScope.launch {
             _settingsFlow.emit(settings)
+        }
+    }
+
+    init {
+        viewModelScope.launch {
+            _settingsFlow.collect {
+                println("AAA ${it.genresInclude?.size}")
+            }
         }
     }
 
@@ -61,12 +70,23 @@ class SettingsViewModel @Inject constructor(val genreRepository: GenreRepository
     }
 
     fun onGenresClick(genre: Genre) {
-        TODO()
+        viewModelScope.launch {
+            if (isAddInIncludeGenres) {
+                val includeGenres = _settingsFlow.value.genresInclude.toMutableList()
+                includeGenres.add(genre)
+                val newSettings = _settingsFlow.value.copy(genresInclude = includeGenres)
+                _settingsFlow.emit(newSettings)
+            } else {
+
+            }
+
+
+        }
     }
 
     fun onBottomsSheetOpen(isAddIncludeClicked: Boolean) {
         viewModelScope.launch {
-            addInIncludeGenres = isAddIncludeClicked
+            isAddInIncludeGenres = isAddIncludeClicked
             when (_bottomSheetEvents.value) {
                 is SettingsScreenBottomSheetEvent.Loading -> {
                     val event = loadAllGenres()
@@ -83,7 +103,6 @@ class SettingsViewModel @Inject constructor(val genreRepository: GenreRepository
             val genres = withContext(Dispatchers.Default) {
                 genreRepository.loadGenres(GenresFilter.GENRES)
             }
-
             delay(1000)
             val explicitGenres =
                 withContext(Dispatchers.Default) {
