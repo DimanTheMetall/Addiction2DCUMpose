@@ -9,8 +9,10 @@
     <string name="chapters">Chapters</string>
     <string name="type">Type</string>
     <string name="genres" translatable="false">Genres</string>
+    <string name="explicit_genres">Explicit genres</string>
     <string name="status">Status</string>
     <string name="themes">Themes</string>
+    <string name="demographics">Demographics</string>
     <string name="serializations">Serializations</string>
     <string name="some_error" translatable="false">Some error happend, please check internet connection or write to Резиденция Козловых</string>
     <string name="authors">Authors</string>

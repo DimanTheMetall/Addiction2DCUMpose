@@ -2,6 +2,7 @@ package com.example.addiction2dcumpose.mvvm.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.addiction2dcumpose.States.events.ui.SettingsScreenBottomSheetEvent
 import com.example.addiction2dcumpose.dataClasses.*
 import com.example.addiction2dcumpose.repositories.GenreRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,6 +14,11 @@ class SettingsViewModel @Inject constructor(genreRepository: GenreRepository): V
 
     private val _settingsFlow = MutableStateFlow(SearchSettings())
     val settingsFlow = _settingsFlow.asStateFlow()
+
+    private val _bottomSheetEvents = MutableStateFlow(SettingsScreenBottomSheetEvent.Loading)
+    val bottomSheetEvents = _bottomSheetEvents.asStateFlow()
+
+    var addInIncludeGenres = true
 
     fun onInitScreen(settings: SearchSettings){
         viewModelScope.launch {
@@ -50,6 +56,14 @@ class SettingsViewModel @Inject constructor(genreRepository: GenreRepository): V
             val newSettings = _settingsFlow.value.copy(sort = type)
             _settingsFlow.emit(newSettings)
         }
+    }
+
+    fun onGenresClick(genre: Genre){
+        TODO()
+    }
+
+    fun onBottomsSheetOpen(){
+        TODO()
     }
 
 
