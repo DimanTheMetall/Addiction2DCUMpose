@@ -306,7 +306,7 @@ private fun TwoButtons(
 }
 
 @Composable
-private fun CustomFlexBox(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+fun CustomFlexBox(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     Layout(content = content, modifier = modifier, measurePolicy = { measurables, constraints ->
         val placeables = measurables.map { measurable ->
             measurable.measure(constraints)

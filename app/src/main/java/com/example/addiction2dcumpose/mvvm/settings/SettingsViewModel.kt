@@ -92,7 +92,8 @@ class SettingsViewModel @Inject constructor(val genreRepository: GenreRepository
                     val event = loadAllGenres()
                     _bottomSheetEvents.emit(event)
                 }
-                is SettingsScreenBottomSheetEvent.LoadingComplete -> {}
+                is LoadingComplete -> {}
+                SettingsScreenBottomSheetEvent.Error -> TODO()
             }
         }
 

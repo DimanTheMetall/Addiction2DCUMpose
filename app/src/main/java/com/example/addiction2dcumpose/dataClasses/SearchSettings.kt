@@ -21,27 +21,6 @@ data class SearchSettings(
     val letters: String = ""
 ) {
 
-    fun copyAsNewInstance(
-        newIncludeGenres: List<Genre> = genresInclude,
-        newExcludeGenres: List<Genre> = genresExclude
-    ): SearchSettings {
-        return SearchSettings(
-            page = page,
-            limit = limit,
-            q = q,
-            type = type,
-            score = score,
-            minScore = minScore,
-            maxScore = maxScore,
-            status = status,
-            sfw = sfw,
-            genresInclude = newIncludeGenres.toMutableList(),
-            genresExclude = newExcludeGenres.toMutableList(),
-            sort = sort,
-            orderBy = orderBy
-        )
-    }
-
     fun getIncludeGenresAsString(): String? {
         return genreToString(genresInclude)
     }

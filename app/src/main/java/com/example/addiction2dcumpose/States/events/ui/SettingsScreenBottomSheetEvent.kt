@@ -10,5 +10,6 @@ sealed class SettingsScreenBottomSheetEvent {
         val themes: List<Genre>?,
         val demographics: List<Genre>?
     ) : SettingsScreenBottomSheetEvent()
+    object Error: SettingsScreenBottomSheetEvent()
 
 }

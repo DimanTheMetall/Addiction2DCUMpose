@@ -1,31 +1,25 @@
 package com.example.addiction2dcumpose.mvvm.settings
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.addiction2dcumpose.R
-import com.example.addiction2dcumpose.States.events.ui.SettingsScreenBottomSheetEvent
 import com.example.addiction2dcumpose.dataClasses.*
+import com.example.addiction2dcumpose.mvvm.random.CustomFlexBox
 import com.example.rxpractic.ui.theme.Addiction2DTheme
 import kotlinx.coroutines.launch
 
@@ -53,9 +47,10 @@ class SettingsScreen(private val viewModel: SettingsViewModel, settings: SearchS
                 BottomsSheetContent(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(300.dp),
+                        .height(300.dp)
+                        .background(color = colorResource(id = R.color.sheetBackground)),
                     onItemClick = { viewModel.onGenresClick(it) },
-                    event = bottomsSheetUi.value
+                    event = bottomsSheetUi.value,
                 )
             }, scaffoldState = bottomSheetScaffoldState, sheetPeekHeight = 0.dp) { paddingValues ->
                 Settings(
@@ -86,24 +81,34 @@ private fun GenresTextField(
     onGenresIconCLick: () -> Unit,
     onExcludeGenresIconCLick: () -> Unit
 ) {
-    Column(modifier = modifier) {
-        Text(text = stringResource(id = R.string.genres))
-        Row {
-            LazyRow {
-                state.genresInclude?.forEach { genre ->
-                    item {
-                        Card {
-                            Text(text = genre.name)
-                        }
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = stringResource(id = R.string.genres),
+            style = MaterialTheme.typography.h6,
+            color = MaterialTheme.colors.primary
+        )
+        Row(modifier = Modifier.fillMaxWidth()) {
+            CustomFlexBox {
+                state.genresInclude.forEach { genre ->
+                    Card(
+                        backgroundColor = MaterialTheme.colors.primary,
+                        modifier = Modifier.padding(2.dp)
+                    ) {
+                        Text(text = genre.name, modifier = Modifier.padding(2.dp))
                     }
                 }
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_add_box),
+                    tint = MaterialTheme.colors.primary,
+                    contentDescription = null,
+                    modifier = Modifier.clickable { onGenresIconCLick.invoke() })
             }
-            Icon(
-                painter = painterResource(id = R.drawable.ic_add_box),
-                contentDescription = null,
-                modifier = Modifier.clickable { onGenresIconCLick.invoke() })
         }
-        Text(text = stringResource(id = R.string.explicit_genres))
+        Text(
+            text = stringResource(id = R.string.explicit_genres),
+            style = MaterialTheme.typography.h6,
+            color = MaterialTheme.colors.primary
+        )
         Row {
             LazyRow {
                 state.genresExclude?.forEach { genre ->
@@ -116,6 +121,7 @@ private fun GenresTextField(
             }
             Icon(
                 painter = painterResource(id = R.drawable.ic_add_box),
+                tint = MaterialTheme.colors.primary,
                 contentDescription = null,
                 modifier = Modifier.clickable { onExcludeGenresIconCLick.invoke() })
         }
@@ -179,9 +185,14 @@ private fun Settings(
                 color = MaterialTheme.colors.primary
             )
             Spacer(modifier = Modifier.height(26.dp))
-            GenresTextField(state = state, modifier = Modifier.fillMaxWidth(), onGenresIconCLick = {
-                onGenresIncludeIconCLick.invoke()
-            }) {
+            GenresTextField(
+                state = state,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                onGenresIconCLick = {
+                    onGenresIncludeIconCLick.invoke()
+                }) {
 
             }
 
@@ -249,121 +260,6 @@ private fun <T : SettingsType> DropMenu(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun BottomsSheetContent(
-    modifier: Modifier = Modifier,
-    onItemClick: (Genre) -> Unit,
-    event: SettingsScreenBottomSheetEvent
-) {
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Spacer(modifier = Modifier.size(16.dp))
-        Card(
-            modifier = Modifier.size(width = 120.dp, height = 10.dp),
-            backgroundColor = MaterialTheme.colors.primary
-        ) { }
-        when (event) {
-            is SettingsScreenBottomSheetEvent.Loading -> {
-                Spacer(modifier = Modifier.size(30.dp))
-                CircularProgressIndicator(modifier = Modifier.size(60.dp))
-            }
-            is SettingsScreenBottomSheetEvent.LoadingComplete -> {
-                GenresColumn(
-                    event = event,
-                    onGenresClick = { onItemClick.invoke(it) })
-            }
-        }
-    }
-}
-
-
-@Composable
-private fun GenresColumn(
-    modifier: Modifier = Modifier,
-    event: SettingsScreenBottomSheetEvent.LoadingComplete,
-    onGenresClick: (Genre) -> Unit
-) {
-    LazyVerticalGrid(
-        modifier = modifier,
-        contentPadding = PaddingValues(12.dp),
-        columns = GridCells.Fixed(3),
-    ) {
-        item(span = {
-            GridItemSpan(maxLineSpan)
-        }, content = {
-            GenresClassCard(stringRes = R.string.genres)
-        })
-
-        event.genres?.forEach { genre ->
-            item {
-                GenreCard(
-                    genre = genre,
-                    modifier = Modifier.clickable { onGenresClick.invoke(genre) })
-            }
-        }
-
-        item(span = {
-            GridItemSpan(maxLineSpan)
-        }, content = {
-            GenresClassCard(stringRes = R.string.explicit_genres)
-        })
-
-        event.explicitGenres?.forEach { genre ->
-            item {
-                GenreCard(
-                    genre = genre,
-                    modifier = Modifier.clickable { onGenresClick.invoke(genre) })
-            }
-        }
-
-        item(span = {
-            GridItemSpan(maxLineSpan)
-        }, content = {
-            GenresClassCard(stringRes = R.string.themes)
-        })
-
-        event.themes?.forEach { genre ->
-            item {
-                GenreCard(
-                    genre = genre,
-                    modifier = Modifier.clickable { onGenresClick.invoke(genre) })
-            }
-        }
-
-        item(span = {
-            GridItemSpan(maxLineSpan)
-        }, content = {
-            GenresClassCard(stringRes = R.string.demographics)
-        })
-
-        event.demographics?.forEach { genre ->
-            item {
-                GenreCard(
-                    genre = genre,
-                    modifier = Modifier.clickable { onGenresClick.invoke(genre) })
-            }
-        }
-
-    }
-}
-
-@Composable
-private fun GenresClassCard(@StringRes stringRes: Int, modifier: Modifier = Modifier) {
-    Card(modifier = modifier, backgroundColor = MaterialTheme.colors.primary) {
-        Text(
-            text = stringResource(id = stringRes),
-            style = MaterialTheme.typography.h5,
-            textAlign = TextAlign.Center
-        )
-    }
-}
-
-@Composable
-private fun GenreCard(modifier: Modifier = Modifier, genre: Genre) {
-    Card(modifier = modifier.padding(4.dp), backgroundColor = MaterialTheme.colors.primaryVariant) {
-        Text(text = genre.name, textAlign = TextAlign.Center)
     }
 }
 
