@@ -64,12 +64,18 @@ class SettingsScreen(private val viewModel: SettingsViewModel, settings: SearchS
                             viewModel.onBottomsSheetOpen(true)
                             bottomSheetScaffoldState.bottomSheetState.expand()
                         }
-                    }
+                    },
+                    onGenreExcludeIconCLick = {
+                        coroutineScope.launch {
+                            viewModel.onBottomsSheetOpen(false)
+                            bottomSheetScaffoldState.bottomSheetState.expand()
+                        }
+                    },
+                    onIncludeGenreItemClicked = { genre -> viewModel.onIncludeGenreClicked(genre) },
+                    onExcludeGenreItemClicked = { genre -> viewModel.onExcludeGenreClicked(genre) }
                 )
             }
         }
-
-
     }
 
 }
@@ -79,7 +85,9 @@ private fun GenresTextField(
     state: SearchSettings,
     modifier: Modifier = Modifier,
     onGenresIconCLick: () -> Unit,
-    onExcludeGenresIconCLick: () -> Unit
+    onExcludeGenresIconCLick: () -> Unit,
+    onIncludeGenreItemClicked: (Genre) -> Unit,
+    onExcludeGenreItemClicked: (Genre) -> Unit
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
@@ -92,7 +100,11 @@ private fun GenresTextField(
                 state.genresInclude.forEach { genre ->
                     Card(
                         backgroundColor = MaterialTheme.colors.primary,
-                        modifier = Modifier.padding(2.dp)
+                        modifier = Modifier
+                            .padding(2.dp)
+                            .clickable {
+                                onIncludeGenreItemClicked.invoke(genre)
+                            }
                     ) {
                         Text(text = genre.name, modifier = Modifier.padding(2.dp))
                     }
@@ -101,7 +113,10 @@ private fun GenresTextField(
                     painter = painterResource(id = R.drawable.ic_add_box),
                     tint = MaterialTheme.colors.primary,
                     contentDescription = null,
-                    modifier = Modifier.clickable { onGenresIconCLick.invoke() })
+                    modifier = Modifier
+                        .clickable { onGenresIconCLick.invoke() }
+                        .size(30.dp)
+                )
             }
         }
         Text(
@@ -110,20 +125,28 @@ private fun GenresTextField(
             color = MaterialTheme.colors.primary
         )
         Row {
-            LazyRow {
-                state.genresExclude?.forEach { genre ->
-                    item {
-                        Card {
-                            Text(text = genre.name)
-                        }
+            CustomFlexBox {
+                state.genresExclude.forEach { genre ->
+                    Card(
+                        backgroundColor = MaterialTheme.colors.primary,
+                        modifier = Modifier
+                            .padding(2.dp)
+                            .clickable {
+                                onExcludeGenreItemClicked.invoke(genre)
+                            }
+                    ) {
+                        Text(text = genre.name, modifier = Modifier.padding(2.dp))
                     }
                 }
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_add_box),
+                    tint = MaterialTheme.colors.primary,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .clickable { onExcludeGenresIconCLick.invoke() }
+                        .size(30.dp)
+                )
             }
-            Icon(
-                painter = painterResource(id = R.drawable.ic_add_box),
-                tint = MaterialTheme.colors.primary,
-                contentDescription = null,
-                modifier = Modifier.clickable { onExcludeGenresIconCLick.invoke() })
         }
     }
 }
@@ -135,7 +158,10 @@ private fun Settings(
     onStatusChanged: (SettingsType) -> Unit,
     onOrderByChanged: (SettingsType) -> Unit,
     onSortChanged: (SettingsType) -> Unit,
-    onGenresIncludeIconCLick: () -> Unit
+    onGenresIncludeIconCLick: () -> Unit,
+    onGenreExcludeIconCLick: () -> Unit,
+    onIncludeGenreItemClicked: (Genre) -> Unit,
+    onExcludeGenreItemClicked: (Genre) -> Unit
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp
     val spacerModifier = Modifier.height(16.dp)
@@ -192,9 +218,13 @@ private fun Settings(
                     .padding(horizontal = 8.dp),
                 onGenresIconCLick = {
                     onGenresIncludeIconCLick.invoke()
-                }) {
-
-            }
+                },
+                onExcludeGenresIconCLick = {
+                    onGenreExcludeIconCLick.invoke()
+                },
+                onIncludeGenreItemClicked = { onIncludeGenreItemClicked.invoke(it) },
+                onExcludeGenreItemClicked = { onExcludeGenreItemClicked.invoke(it) }
+            )
 
         }
     }
@@ -273,6 +303,9 @@ private fun SettingsScreenPreview() {
         onStatusChanged = { },
         onOrderByChanged = { },
         onSortChanged = {},
-        onGenresIncludeIconCLick = {})
+        onGenresIncludeIconCLick = {},
+        onGenreExcludeIconCLick = {},
+        onExcludeGenreItemClicked = {},
+        onIncludeGenreItemClicked = {})
 }
 

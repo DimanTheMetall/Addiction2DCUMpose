@@ -10,6 +10,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
+import okhttp3.internal.toImmutableList
 import javax.inject.Inject
 
 class SettingsViewModel @Inject constructor(val genreRepository: GenreRepository) : ViewModel() {
@@ -72,15 +73,20 @@ class SettingsViewModel @Inject constructor(val genreRepository: GenreRepository
     fun onGenresClick(genre: Genre) {
         viewModelScope.launch {
             if (isAddInIncludeGenres) {
-                val includeGenres = _settingsFlow.value.genresInclude.toMutableList()
-                includeGenres.add(genre)
-                val newSettings = _settingsFlow.value.copy(genresInclude = includeGenres)
-                _settingsFlow.emit(newSettings)
+                if (!_settingsFlow.value.genresInclude.contains(genre)) {
+                    val includeGenres = _settingsFlow.value.genresInclude.toMutableList()
+                    includeGenres.add(genre)
+                    val newSettings = _settingsFlow.value.copy(genresInclude = includeGenres)
+                    _settingsFlow.emit(newSettings)
+                }
             } else {
-
+                if (!_settingsFlow.value.genresExclude.contains(genre)) {
+                    val excludeGenres = _settingsFlow.value.genresExclude.toMutableList()
+                    excludeGenres.add(genre)
+                    val newSettings = _settingsFlow.value.copy(genresExclude = excludeGenres)
+                    _settingsFlow.emit(newSettings)
+                }
             }
-
-
         }
     }
 
@@ -96,7 +102,24 @@ class SettingsViewModel @Inject constructor(val genreRepository: GenreRepository
                 SettingsScreenBottomSheetEvent.Error -> TODO()
             }
         }
+    }
 
+    fun onIncludeGenreClicked(genre: Genre){
+        viewModelScope.launch {
+            val includesGenre = _settingsFlow.value.genresInclude.toMutableList()
+            includesGenre.remove(genre)
+            val newSettings = _settingsFlow.value.copy(genresInclude = includesGenre)
+            _settingsFlow.emit(newSettings)
+        }
+    }
+
+    fun onExcludeGenreClicked(genre: Genre){
+        viewModelScope.launch {
+            val excludesGenre = _settingsFlow.value.genresExclude.toMutableList()
+            excludesGenre.remove(genre)
+            val newSettings = _settingsFlow.value.copy(genresExclude = excludesGenre)
+            _settingsFlow.emit(newSettings)
+        }
     }
 
     private suspend fun loadAllGenres(): SettingsScreenBottomSheetEvent.LoadingComplete {
