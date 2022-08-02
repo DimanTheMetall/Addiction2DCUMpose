@@ -33,6 +33,10 @@ data class SearchSettings(
         return this.copy(page = page + 1)
     }
 
+    fun changeCheck(): SearchSettings {
+        return this.copy(sfw = !sfw)
+    }
+
     private fun genreToString(genreList: List<Genre>?): String? {
         var result: String? = null
         return if (genreList.isNullOrEmpty()) {

@@ -21,8 +21,7 @@
     <string name="toast_error">Some error happened, pls check internet connection</string>
 
     <string name="close">Close</string>
-
-
+    <string name="sfw">SFW</string>
 
 
 </resources>

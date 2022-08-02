@@ -2,8 +2,11 @@ package com.example.addiction2dcumpose.mvvm.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -41,6 +44,7 @@ class SettingsScreen(private val viewModel: SettingsViewModel, settings: SearchS
                 initialValue = BottomSheetValue.Collapsed
             )
         )
+        val scrollState = rememberScrollState()
         val coroutineScope = rememberCoroutineScope()
         Addiction2DTheme {
             BottomSheetScaffold(sheetContent = {
@@ -54,6 +58,9 @@ class SettingsScreen(private val viewModel: SettingsViewModel, settings: SearchS
                 )
             }, scaffoldState = bottomSheetScaffoldState, sheetPeekHeight = 0.dp) { paddingValues ->
                 Settings(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(scrollState),
                     state = settingsState.value,
                     onTypeChanged = { viewModel.onTypeChanged(it) },
                     onStatusChanged = { viewModel.onStatusChanged(it) },
@@ -72,7 +79,8 @@ class SettingsScreen(private val viewModel: SettingsViewModel, settings: SearchS
                         }
                     },
                     onIncludeGenreItemClicked = { genre -> viewModel.onIncludeGenreClicked(genre) },
-                    onExcludeGenreItemClicked = { genre -> viewModel.onExcludeGenreClicked(genre) }
+                    onExcludeGenreItemClicked = { genre -> viewModel.onExcludeGenreClicked(genre) },
+                    onCheckSFWClick = { viewModel.onCheckSFWClick() }
                 )
             }
         }
@@ -153,6 +161,7 @@ private fun GenresTextField(
 
 @Composable
 private fun Settings(
+    modifier: Modifier = Modifier,
     state: SearchSettings,
     onTypeChanged: (SettingsType) -> Unit,
     onStatusChanged: (SettingsType) -> Unit,
@@ -161,13 +170,14 @@ private fun Settings(
     onGenresIncludeIconCLick: () -> Unit,
     onGenreExcludeIconCLick: () -> Unit,
     onIncludeGenreItemClicked: (Genre) -> Unit,
-    onExcludeGenreItemClicked: (Genre) -> Unit
+    onExcludeGenreItemClicked: (Genre) -> Unit,
+    onCheckSFWClick: () -> Unit
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp
     val spacerModifier = Modifier.height(16.dp)
     Addiction2DTheme {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = modifier,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = spacerModifier)
@@ -225,6 +235,26 @@ private fun Settings(
                 onIncludeGenreItemClicked = { onIncludeGenreItemClicked.invoke(it) },
                 onExcludeGenreItemClicked = { onExcludeGenreItemClicked.invoke(it) }
             )
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 8.dp),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(
+                    checked = state.sfw,
+                    onCheckedChange = { onCheckSFWClick.invoke() },
+                    modifier = Modifier.size(30.dp),
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = MaterialTheme.colors.primary,
+                        uncheckedColor = MaterialTheme.colors.primary
+                    )
+                )
+                Text(text = stringResource(R.string.sfw), color = MaterialTheme.colors.primary)
+            }
+
 
         }
     }
@@ -298,6 +328,7 @@ private fun <T : SettingsType> DropMenu(
 @Composable
 private fun SettingsScreenPreview() {
     Settings(
+        modifier = Modifier.fillMaxSize(),
         state = SearchSettings(),
         onTypeChanged = { },
         onStatusChanged = { },
@@ -306,6 +337,7 @@ private fun SettingsScreenPreview() {
         onGenresIncludeIconCLick = {},
         onGenreExcludeIconCLick = {},
         onExcludeGenreItemClicked = {},
-        onIncludeGenreItemClicked = {})
+        onIncludeGenreItemClicked = {},
+        onCheckSFWClick = {})
 }
 

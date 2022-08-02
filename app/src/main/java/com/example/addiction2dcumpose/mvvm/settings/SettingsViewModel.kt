@@ -122,6 +122,12 @@ class SettingsViewModel @Inject constructor(val genreRepository: GenreRepository
         }
     }
 
+    fun onCheckSFWClick(){
+        viewModelScope.launch {
+            _settingsFlow.emit(_settingsFlow.value.changeCheck())
+        }
+    }
+
     private suspend fun loadAllGenres(): SettingsScreenBottomSheetEvent.LoadingComplete {
         val result = viewModelScope.async {
             val genres = withContext(Dispatchers.Default) {
