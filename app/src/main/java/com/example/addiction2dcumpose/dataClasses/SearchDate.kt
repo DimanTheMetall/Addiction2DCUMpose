@@ -1,13 +1,13 @@
 package com.example.addiction2dcumpose.dataClasses
 
-class SearchDate(private val year: Int, private val month: Int?, private val day: Int?) {
+class SearchDate(val year: Int, val month: Int?, val day: Int?) {
 
-    fun getDate(): String{
+    fun getDate(): String {
         var result = "$year"
-        if (month!=null){
-            result+= "-$month"
-            if (day!=null) {
-                result+="-$day"
+        if (month != null) {
+            result = "$month-$year"
+            if (day != null) {
+                result = "$month-$day-$year"
             }
         }
         return result

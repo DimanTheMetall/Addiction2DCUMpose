@@ -1,11 +1,8 @@
 package com.example.addiction2dcumpose.mvvm.settings
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,14 +20,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import com.example.addiction2dcumpose.R
-import com.example.addiction2dcumpose.States.events.ui.SettingsScreenDialogsState
 import com.example.addiction2dcumpose.customLayout.CustomFlexBox
-import com.example.addiction2dcumpose.customLayout.ScorePicker
 import com.example.addiction2dcumpose.dataClasses.*
 import com.example.rxpractic.ui.theme.Addiction2DTheme
 import kotlinx.coroutines.launch
+import java.util.*
 
 class SettingsScreen(private val viewModel: SettingsViewModel, settings: SearchSettings) {
 
@@ -45,6 +40,7 @@ class SettingsScreen(private val viewModel: SettingsViewModel, settings: SearchS
         val settingsState = viewModel.settingsFlow.collectAsState()
         val bottomsSheetUi = viewModel.bottomSheetEvents.collectAsState()
         val dialogsState = viewModel.dialogsFlow.collectAsState()
+        val dateDialogsState = viewModel.dateDialogsFlow.collectAsState()
 
         val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
             bottomSheetState = rememberBottomSheetState(
@@ -89,16 +85,37 @@ class SettingsScreen(private val viewModel: SettingsViewModel, settings: SearchS
                     onExcludeGenreItemClicked = { genre -> viewModel.onExcludeGenreClicked(genre) },
                     onCheckSFWClick = { viewModel.onCheckSFWClick() },
                     onChangeScoreClick = { scoreDialogType -> viewModel.onScoreChangeClick(scoreType = scoreDialogType) },
-                    onResetScoreClicked = { scoreDialogType -> viewModel.onScoreResetClick(scoreType = scoreDialogType) }
+                    onResetScoreClicked = { scoreDialogType -> viewModel.onScoreResetClick(scoreType = scoreDialogType) },
+                    onDateChangeClicked = { dateDialogType ->
+                        viewModel.onChangeDateClicked(
+                            dateDialogType
+                        )
+                    },
+                    onDateResetClicked = { dateDialogType ->
+                        viewModel.onResetDateClicked(
+                            dateDialogType
+                        )
+                    }
                 )
-                Dialogs(
+                ScoreDialogs(
                     dialogsState = dialogsState.value,
                     settingsState = settingsState.value,
-                    onCancelClicked = { viewModel.cancelAllDialogs() },
+                    onCancelClicked = { viewModel.onCancelScoreDialogClicked() },
                     onApplyClicked = { score, scoreDialogType ->
-                        viewModel.applyNewScore(
+                        viewModel.onApplyNewScoreClicked(
                             score,
                             scoreDialogType
+                        )
+                    }
+                )
+                DateDialogs(
+                    settingsState = settingsState.value,
+                    dialogsState = dateDialogsState.value,
+                    onCancelClicked = { viewModel.onCancelDateClicked() },
+                    onApplyClicked = { searchDate, dateDialogType ->
+                        viewModel.onApplyNewDateClicked(
+                            dialogType = dateDialogType,
+                            date = searchDate
                         )
                     }
                 )
@@ -193,7 +210,9 @@ private fun Settings(
     onExcludeGenreItemClicked: (Genre) -> Unit,
     onCheckSFWClick: () -> Unit,
     onChangeScoreClick: (ScoreDialogType) -> Unit,
-    onResetScoreClicked: (ScoreDialogType) -> Unit
+    onResetScoreClicked: (ScoreDialogType) -> Unit,
+    onDateChangeClicked: (DateDialogType) -> Unit,
+    onDateResetClicked: (DateDialogType) -> Unit
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp
     val spacerModifier = Modifier.height(16.dp)
@@ -310,7 +329,62 @@ private fun Settings(
                 )
             }
 
+            Text(
+                text = stringResource(R.string.date),
+                style = MaterialTheme.typography.h5,
+                color = MaterialTheme.colors.primary
+            )
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                DateColumn(
+                    settings = state,
+                    dialogType = DateDialogType.START_DATE,
+                    onChangeClick = { dateDialogType -> onDateChangeClicked.invoke(dateDialogType) },
+                    onResetCLicked = { dateDialogType -> onDateResetClicked.invoke(dateDialogType) }
+                )
+                DateColumn(
+                    settings = state,
+                    dialogType = DateDialogType.END_DATE,
+                    onChangeClick = { dateDialogType -> onDateChangeClicked.invoke(dateDialogType) },
+                    onResetCLicked = { dateDialogType -> onDateResetClicked.invoke(dateDialogType) }
+                )
+            }
 
+
+        }
+    }
+}
+
+@Composable
+private fun DateColumn(
+    modifier: Modifier = Modifier,
+    settings: SearchSettings,
+    dialogType: DateDialogType,
+    onChangeClick: (DateDialogType) -> Unit,
+    onResetCLicked: (DateDialogType) -> Unit
+) {
+    val date = when (dialogType) {
+        DateDialogType.START_DATE -> {
+            settings.startDate?.getDate() ?: "No"
+        }
+        DateDialogType.END_DATE -> {
+            settings.endDate?.getDate() ?: "No"
+        }
+    }
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = dialogType.dateName,
+            style = MaterialTheme.typography.h5,
+            color = MaterialTheme.colors.primary
+        )
+        Text(text = date, style = MaterialTheme.typography.h5)
+        Button(onClick = { onChangeClick.invoke(dialogType) }) {
+            Text(text = stringResource(id = R.string.change))
+        }
+        Button(onClick = { onResetCLicked.invoke(dialogType) }) {
+            Text(text = stringResource(id = R.string.reset))
         }
     }
 }
@@ -418,46 +492,6 @@ private fun <T : SettingsType> DropMenu(
     }
 }
 
-@Composable
-private fun Dialogs(
-    dialogsState: SettingsScreenDialogsState,
-    settingsState: SearchSettings,
-    onCancelClicked: () -> Unit,
-    onApplyClicked: (Int, ScoreDialogType) -> Unit
-) {
-    if (dialogsState.scoreDialog) {
-        Dialog(onDismissRequest = { /*TODO*/ }) {
-            ScorePicker(
-                modifier = Modifier.size(260.dp),
-                type = ScoreDialogType.SCORE,
-                state = settingsState,
-                onCancelClicked = { onCancelClicked.invoke() },
-                onApplyClicked = { score -> onApplyClicked.invoke(score, ScoreDialogType.SCORE) }
-            )
-        }
-    }
-    if (dialogsState.maxScoreDialog) {
-        Dialog(onDismissRequest = { /*TODO*/ }){
-            ScorePicker(
-                type = ScoreDialogType.MAX_SCORE,
-                state = settingsState,
-                onCancelClicked = { onCancelClicked.invoke() },
-                onApplyClicked = { score -> onApplyClicked(score, ScoreDialogType.MAX_SCORE) }
-            )
-        }
-    }
-    if (dialogsState.minScoreDialog) {
-        Dialog(onDismissRequest = { /*TODO*/ }){
-            ScorePicker(
-                type = ScoreDialogType.MIN_SCORE,
-                state = settingsState,
-                onCancelClicked = { onCancelClicked.invoke() },
-                onApplyClicked = { score -> onApplyClicked(score, ScoreDialogType.MIN_SCORE) }
-            )
-        }
-    }
-}
-
 
 @Preview(showBackground = true)
 @Composable
@@ -475,6 +509,8 @@ private fun SettingsScreenPreview() {
         onIncludeGenreItemClicked = {},
         onCheckSFWClick = {},
         onResetScoreClicked = {},
-        onChangeScoreClick = {})
+        onChangeScoreClick = {},
+        onDateResetClicked = {},
+        onDateChangeClicked = {})
 }
 

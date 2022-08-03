@@ -4,14 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.addiction2dcumpose.States.events.ui.SettingsScreenBottomSheetEvent
 import com.example.addiction2dcumpose.States.events.ui.SettingsScreenBottomSheetEvent.LoadingComplete
+import com.example.addiction2dcumpose.States.events.ui.SettingsScreenDateDialogsState
 import com.example.addiction2dcumpose.States.events.ui.SettingsScreenDialogsState
 import com.example.addiction2dcumpose.dataClasses.*
 import com.example.addiction2dcumpose.repositories.GenreRepository
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
-import okhttp3.internal.toImmutableList
 import javax.inject.Inject
 
 class SettingsViewModel @Inject constructor(val genreRepository: GenreRepository) : ViewModel() {
@@ -31,6 +30,14 @@ class SettingsViewModel @Inject constructor(val genreRepository: GenreRepository
         )
     )
     val dialogsFlow = _dialogsFlow.asStateFlow()
+
+    private val _dateDialogsFlow = MutableStateFlow(
+        SettingsScreenDateDialogsState(
+            startDate = false,
+            endDate = false
+        )
+    )
+    val dateDialogsFlow = _dateDialogsFlow.asStateFlow()
 
     private var isAddInIncludeGenres = true
 
@@ -174,16 +181,16 @@ class SettingsViewModel @Inject constructor(val genreRepository: GenreRepository
 
     }
 
-    fun applyNewScore(score: Int, scoreType: ScoreDialogType){
+    fun onApplyNewScoreClicked(score: Int, scoreType: ScoreDialogType) {
         viewModelScope.launch {
             emitNewScore(score = score, scoreType = scoreType)
-            emitCloseAllDialogs()
+            emitCloseAllScoreDialogs()
         }
     }
 
-    fun cancelAllDialogs(){
+    fun onCancelScoreDialogClicked() {
         viewModelScope.launch {
-            emitCloseAllDialogs()
+            emitCloseAllScoreDialogs()
         }
     }
 
@@ -193,9 +200,75 @@ class SettingsViewModel @Inject constructor(val genreRepository: GenreRepository
         }
     }
 
-    private suspend fun emitNewScore(score: Int, scoreType: ScoreDialogType){
+    fun onApplyNewDateClicked(dialogType: DateDialogType, date: SearchDate){
+        viewModelScope.launch {
+            emitNewDate(date = date, dialogType = dialogType)
+            emitCloseAllDateDialogs()
+        }
+    }
+
+    fun onCancelDateClicked(){
+        viewModelScope.launch {
+            emitCloseAllDateDialogs()
+        }
+    }
+
+    fun onChangeDateClicked(dialogType: DateDialogType){
+        viewModelScope.launch {
+            when(dialogType){
+                DateDialogType.START_DATE -> {
+                    _dateDialogsFlow.emit(
+                        SettingsScreenDateDialogsState(
+                            startDate = true,
+                            endDate = false
+                        )
+                    )
+                }
+                DateDialogType.END_DATE -> {
+                    _dateDialogsFlow.emit(
+                        SettingsScreenDateDialogsState(
+                            startDate = false,
+                            endDate = true
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    fun onResetDateClicked(dialogType: DateDialogType){
+        val currentSettings = _settingsFlow.value
+        viewModelScope.launch {
+            when(dialogType){
+                DateDialogType.START_DATE -> {
+                    _settingsFlow.emit(currentSettings.copy(startDate = null))
+                }
+                DateDialogType.END_DATE -> {
+                    _settingsFlow.emit(currentSettings.copy(endDate = null))
+                }
+            }
+        }
+    }
+
+    private suspend fun emitCloseAllDateDialogs(){
+        _dateDialogsFlow.emit(SettingsScreenDateDialogsState(startDate = false, endDate = false))
+    }
+
+    private suspend fun emitNewDate(date: SearchDate, dialogType: DateDialogType) {
+        val currentSettings = _settingsFlow.value
+        when(dialogType){
+            DateDialogType.START_DATE -> {
+                _settingsFlow.emit(currentSettings.copy(startDate = date))
+            }
+            DateDialogType.END_DATE -> {
+                _settingsFlow.emit(currentSettings.copy(endDate = date))
+            }
+        }
+    }
+
+    private suspend fun emitNewScore(score: Int, scoreType: ScoreDialogType) {
         val currentsSettings = _settingsFlow.value
-        when (scoreType){
+        when (scoreType) {
             ScoreDialogType.SCORE -> {
                 _settingsFlow.emit(currentsSettings.copy(score = score))
             }
@@ -208,7 +281,7 @@ class SettingsViewModel @Inject constructor(val genreRepository: GenreRepository
         }
     }
 
-    private suspend fun emitCloseAllDialogs(){
+    private suspend fun emitCloseAllScoreDialogs() {
         _dialogsFlow.emit(
             SettingsScreenDialogsState(
                 scoreDialog = false,
