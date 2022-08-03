@@ -26,6 +26,7 @@ import com.example.addiction2dcumpose.R
 import com.example.addiction2dcumpose.States.MangaResultState
 import com.example.addiction2dcumpose.States.RandomScreenButtonState
 import com.example.addiction2dcumpose.StubData.MangaStubData.mangaData
+import com.example.addiction2dcumpose.customLayout.CustomFlexBox
 import com.example.addiction2dcumpose.dataClasses.*
 import com.example.rxpractic.ui.theme.Addiction2DTheme
 import com.skydoves.landscapist.CircularReveal
@@ -304,45 +305,6 @@ private fun TwoButtons(
         }
     }
 }
-
-@Composable
-fun CustomFlexBox(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
-    Layout(content = content, modifier = modifier, measurePolicy = { measurables, constraints ->
-        val placeables = measurables.map { measurable ->
-            measurable.measure(constraints)
-        }
-        var maxWidth = 0
-        var maxHeight = placeables[0].height
-        var currentWidth = 0
-
-        placeables.forEach { placeable ->
-            if (placeable.width + currentWidth > constraints.maxWidth) {
-                println("AAA is true")
-                currentWidth = 0
-                maxWidth = max(a = placeable.width + currentWidth, b = maxWidth)
-                maxHeight += placeable.height
-            }
-            currentWidth += placeable.width
-        }
-
-        layout(width = constraints.maxWidth, height = maxHeight) {
-            var placeableY = 0
-            var placeableX = 0
-
-            placeables.forEach { placeable ->
-                if (placeable.width + placeableX > constraints.maxWidth) {
-                    placeableX = 0
-                    placeableY += placeable.height
-                }
-
-                placeable.placeRelative(placeableX, placeableY)
-                placeableX += placeable.width
-            }
-
-        }
-    })
-}
-
 
 @Composable
 private fun MangaInfoCard(

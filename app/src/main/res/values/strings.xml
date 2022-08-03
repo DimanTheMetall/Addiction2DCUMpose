@@ -22,6 +22,11 @@
 
     <string name="close">Close</string>
     <string name="sfw">SFW</string>
+    <string name="score">Score</string>
+    <string name="apply">Apply</string>
+    <string name="cancel">Cancel</string>
+    <string name="change">Change</string>
+    <string name="reset">Reset</string>
 
 
 </resources>

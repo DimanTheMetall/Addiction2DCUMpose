@@ -1,11 +1,14 @@
 package com.example.addiction2dcumpose.mvvm.settings
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -20,9 +23,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import com.example.addiction2dcumpose.R
+import com.example.addiction2dcumpose.States.events.ui.SettingsScreenDialogsState
+import com.example.addiction2dcumpose.customLayout.CustomFlexBox
+import com.example.addiction2dcumpose.customLayout.ScorePicker
 import com.example.addiction2dcumpose.dataClasses.*
-import com.example.addiction2dcumpose.mvvm.random.CustomFlexBox
 import com.example.rxpractic.ui.theme.Addiction2DTheme
 import kotlinx.coroutines.launch
 
@@ -38,6 +44,7 @@ class SettingsScreen(private val viewModel: SettingsViewModel, settings: SearchS
 
         val settingsState = viewModel.settingsFlow.collectAsState()
         val bottomsSheetUi = viewModel.bottomSheetEvents.collectAsState()
+        val dialogsState = viewModel.dialogsFlow.collectAsState()
 
         val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
             bottomSheetState = rememberBottomSheetState(
@@ -80,7 +87,20 @@ class SettingsScreen(private val viewModel: SettingsViewModel, settings: SearchS
                     },
                     onIncludeGenreItemClicked = { genre -> viewModel.onIncludeGenreClicked(genre) },
                     onExcludeGenreItemClicked = { genre -> viewModel.onExcludeGenreClicked(genre) },
-                    onCheckSFWClick = { viewModel.onCheckSFWClick() }
+                    onCheckSFWClick = { viewModel.onCheckSFWClick() },
+                    onChangeScoreClick = { scoreDialogType -> viewModel.onScoreChangeClick(scoreType = scoreDialogType) },
+                    onResetScoreClicked = { scoreDialogType -> viewModel.onScoreResetClick(scoreType = scoreDialogType) }
+                )
+                Dialogs(
+                    dialogsState = dialogsState.value,
+                    settingsState = settingsState.value,
+                    onCancelClicked = { viewModel.cancelAllDialogs() },
+                    onApplyClicked = { score, scoreDialogType ->
+                        viewModel.applyNewScore(
+                            score,
+                            scoreDialogType
+                        )
+                    }
                 )
             }
         }
@@ -171,7 +191,9 @@ private fun Settings(
     onGenreExcludeIconCLick: () -> Unit,
     onIncludeGenreItemClicked: (Genre) -> Unit,
     onExcludeGenreItemClicked: (Genre) -> Unit,
-    onCheckSFWClick: () -> Unit
+    onCheckSFWClick: () -> Unit,
+    onChangeScoreClick: (ScoreDialogType) -> Unit,
+    onResetScoreClicked: (ScoreDialogType) -> Unit
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp
     val spacerModifier = Modifier.height(16.dp)
@@ -254,10 +276,83 @@ private fun Settings(
                 )
                 Text(text = stringResource(R.string.sfw), color = MaterialTheme.colors.primary)
             }
+            Spacer(modifier = Modifier.height(20.dp))
+            Text(
+                text = stringResource(R.string.score),
+                style = MaterialTheme.typography.h5,
+                color = MaterialTheme.colors.primary
+            )
+
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                ScoreColumn(
+                    modifier = Modifier.width(140.dp),
+                    type = ScoreDialogType.SCORE,
+                    state = state,
+                    onChangeClick = { onChangeScoreClick.invoke(ScoreDialogType.SCORE) },
+                    onResetClicked = { onResetScoreClicked.invoke(ScoreDialogType.SCORE) }
+                )
+                ScoreColumn(
+                    modifier = Modifier.width(140.dp),
+                    type = ScoreDialogType.MAX_SCORE,
+                    state = state,
+                    onChangeClick = { onChangeScoreClick.invoke(ScoreDialogType.MAX_SCORE) },
+                    onResetClicked = { onResetScoreClicked.invoke(ScoreDialogType.MAX_SCORE) }
+                )
+                ScoreColumn(
+                    modifier = Modifier.width(140.dp),
+                    type = ScoreDialogType.MIN_SCORE,
+                    state = state,
+                    onChangeClick = { onChangeScoreClick.invoke(ScoreDialogType.MIN_SCORE) },
+                    onResetClicked = { onResetScoreClicked.invoke(ScoreDialogType.MIN_SCORE) }
+                )
+            }
 
 
         }
     }
+}
+
+@Composable
+private fun ScoreColumn(
+    modifier: Modifier = Modifier,
+    type: ScoreDialogType,
+    state: SearchSettings,
+    onChangeClick: () -> Unit,
+    onResetClicked: () -> Unit
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        val score = when (type) {
+            ScoreDialogType.SCORE -> state.score ?: "No"
+            ScoreDialogType.MAX_SCORE -> state.maxScore ?: "No"
+            ScoreDialogType.MIN_SCORE -> state.minScore ?: "No"
+        }
+        Text(
+            text = type.scoreName,
+            style = MaterialTheme.typography.h5,
+            color = MaterialTheme.colors.primary
+        )
+        Text(text = score.toString(), style = MaterialTheme.typography.h6)
+        Button(
+            onClick = { onChangeClick.invoke() },
+            shape = RoundedCornerShape(corner = CornerSize(12.dp))
+        ) {
+            Text(text = stringResource(R.string.change))
+        }
+        Button(
+            onClick = { onResetClicked.invoke() },
+            shape = RoundedCornerShape(corner = CornerSize(12.dp))
+        ) {
+            Text(text = stringResource(R.string.reset))
+        }
+    }
+
 }
 
 
@@ -323,6 +418,46 @@ private fun <T : SettingsType> DropMenu(
     }
 }
 
+@Composable
+private fun Dialogs(
+    dialogsState: SettingsScreenDialogsState,
+    settingsState: SearchSettings,
+    onCancelClicked: () -> Unit,
+    onApplyClicked: (Int, ScoreDialogType) -> Unit
+) {
+    if (dialogsState.scoreDialog) {
+        Dialog(onDismissRequest = { /*TODO*/ }) {
+            ScorePicker(
+                modifier = Modifier.size(260.dp),
+                type = ScoreDialogType.SCORE,
+                state = settingsState,
+                onCancelClicked = { onCancelClicked.invoke() },
+                onApplyClicked = { score -> onApplyClicked.invoke(score, ScoreDialogType.SCORE) }
+            )
+        }
+    }
+    if (dialogsState.maxScoreDialog) {
+        Dialog(onDismissRequest = { /*TODO*/ }){
+            ScorePicker(
+                type = ScoreDialogType.MAX_SCORE,
+                state = settingsState,
+                onCancelClicked = { onCancelClicked.invoke() },
+                onApplyClicked = { score -> onApplyClicked(score, ScoreDialogType.MAX_SCORE) }
+            )
+        }
+    }
+    if (dialogsState.minScoreDialog) {
+        Dialog(onDismissRequest = { /*TODO*/ }){
+            ScorePicker(
+                type = ScoreDialogType.MIN_SCORE,
+                state = settingsState,
+                onCancelClicked = { onCancelClicked.invoke() },
+                onApplyClicked = { score -> onApplyClicked(score, ScoreDialogType.MIN_SCORE) }
+            )
+        }
+    }
+}
+
 
 @Preview(showBackground = true)
 @Composable
@@ -338,6 +473,8 @@ private fun SettingsScreenPreview() {
         onGenreExcludeIconCLick = {},
         onExcludeGenreItemClicked = {},
         onIncludeGenreItemClicked = {},
-        onCheckSFWClick = {})
+        onCheckSFWClick = {},
+        onResetScoreClicked = {},
+        onChangeScoreClick = {})
 }
 
