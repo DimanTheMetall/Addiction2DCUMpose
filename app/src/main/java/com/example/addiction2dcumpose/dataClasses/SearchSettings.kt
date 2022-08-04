@@ -38,7 +38,7 @@ data class SearchSettings(
     }
 
     private fun genreToString(genreList: List<Genre>?): String? {
-        var result: String? = null
+        var result: String? = ""
         return if (genreList.isNullOrEmpty()) {
             result
         } else {

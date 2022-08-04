@@ -69,7 +69,7 @@ class SearchScreen(private val viewModel: SearchViewModel) : DaggerViewModelCrea
                     settings = settingsState.value
                 ).Screen(onSettingsChanged = { newSettings ->
                     viewModel.changeSettings(newSettings)
-                })
+                }, navController = navController)
             }
             composable("moreInfo") {}
         }

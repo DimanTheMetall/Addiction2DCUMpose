@@ -20,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.addiction2dcumpose.R
 import com.example.addiction2dcumpose.customLayout.CustomFlexBox
 import com.example.addiction2dcumpose.dataClasses.*
@@ -35,7 +36,7 @@ class SettingsScreen(private val viewModel: SettingsViewModel, settings: SearchS
 
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
-    fun Screen(onSettingsChanged: (SearchSettings) -> Unit) {
+    fun Screen(onSettingsChanged: (SearchSettings) -> Unit, navController: NavController) {
 
         val settingsState = viewModel.settingsFlow.collectAsState()
         val bottomsSheetUi = viewModel.bottomSheetEvents.collectAsState()
@@ -49,6 +50,7 @@ class SettingsScreen(private val viewModel: SettingsViewModel, settings: SearchS
         )
         val scrollState = rememberScrollState()
         val coroutineScope = rememberCoroutineScope()
+
         Addiction2DTheme {
             BottomSheetScaffold(sheetContent = {
                 BottomsSheetContent(
@@ -95,6 +97,12 @@ class SettingsScreen(private val viewModel: SettingsViewModel, settings: SearchS
                         viewModel.onResetDateClicked(
                             dateDialogType
                         )
+                    },
+                    onApplySettingsClicked = {
+                        onSettingsChanged.invoke(settingsState.value)
+                        navController.popBackStack()},
+                    onCancelSettingsClicked = {
+                        navController.popBackStack()
                     }
                 )
                 ScoreDialogs(
@@ -212,7 +220,9 @@ private fun Settings(
     onChangeScoreClick: (ScoreDialogType) -> Unit,
     onResetScoreClicked: (ScoreDialogType) -> Unit,
     onDateChangeClicked: (DateDialogType) -> Unit,
-    onDateResetClicked: (DateDialogType) -> Unit
+    onDateResetClicked: (DateDialogType) -> Unit,
+    onApplySettingsClicked: () -> Unit,
+    onCancelSettingsClicked: () -> Unit
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp
     val spacerModifier = Modifier.height(16.dp)
@@ -328,7 +338,7 @@ private fun Settings(
                     onResetClicked = { onResetScoreClicked.invoke(ScoreDialogType.MIN_SCORE) }
                 )
             }
-
+            Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = stringResource(R.string.date),
                 style = MaterialTheme.typography.h5,
@@ -350,6 +360,18 @@ private fun Settings(
                     onChangeClick = { dateDialogType -> onDateChangeClicked.invoke(dateDialogType) },
                     onResetCLicked = { dateDialogType -> onDateResetClicked.invoke(dateDialogType) }
                 )
+            }
+            Spacer(modifier = Modifier.size(20.dp))
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Button(onClick = { onCancelSettingsClicked.invoke() }) {
+                    Text(text = stringResource(id = R.string.cancel))
+                }
+                Button(onClick = { onApplySettingsClicked.invoke() }) {
+                    Text(text = stringResource(id = R.string.apply))
+                }
             }
 
 
@@ -380,10 +402,16 @@ private fun DateColumn(
             color = MaterialTheme.colors.primary
         )
         Text(text = date, style = MaterialTheme.typography.h5)
-        Button(onClick = { onChangeClick.invoke(dialogType) }) {
+        Button(
+            onClick = { onChangeClick.invoke(dialogType) },
+            shape = RoundedCornerShape(corner = CornerSize(12.dp))
+        ) {
             Text(text = stringResource(id = R.string.change))
         }
-        Button(onClick = { onResetCLicked.invoke(dialogType) }) {
+        Button(
+            onClick = { onResetCLicked.invoke(dialogType) },
+            shape = RoundedCornerShape(corner = CornerSize(12.dp))
+        ) {
             Text(text = stringResource(id = R.string.reset))
         }
     }
@@ -511,6 +539,8 @@ private fun SettingsScreenPreview() {
         onResetScoreClicked = {},
         onChangeScoreClick = {},
         onDateResetClicked = {},
-        onDateChangeClicked = {})
+        onDateChangeClicked = {},
+        onApplySettingsClicked = {},
+        onCancelSettingsClicked = {})
 }
 
