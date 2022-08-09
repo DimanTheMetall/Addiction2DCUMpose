@@ -112,11 +112,32 @@ class SettingsViewModel @Inject constructor(val genreRepository: GenreRepository
             isAddInIncludeGenres = isAddIncludeClicked
             when (_bottomSheetEvents.value) {
                 is SettingsScreenBottomSheetEvent.Loading -> {
-                    val event = loadAllGenres()
-                    _bottomSheetEvents.emit(event)
+                    try {
+                        val event = loadAllGenres()
+                        _bottomSheetEvents.emit(event)
+                    } catch (e: Throwable) {
+                        _bottomSheetEvents.emit(SettingsScreenBottomSheetEvent.Error)
+                    }
+
                 }
-                is LoadingComplete -> {}
-                SettingsScreenBottomSheetEvent.Error -> TODO()
+                is LoadingComplete -> {
+                    //Save in DB impl
+                }
+                is SettingsScreenBottomSheetEvent.Error -> {
+                    //Maybe impl try load
+                }
+            }
+        }
+    }
+
+    fun onTryAgainClicked() {
+        viewModelScope.launch {
+            try {
+                _bottomSheetEvents.emit(SettingsScreenBottomSheetEvent.Loading)
+                val event = loadAllGenres()
+                _bottomSheetEvents.emit(event)
+            } catch (e: Throwable) {
+                _bottomSheetEvents.emit(SettingsScreenBottomSheetEvent.Error)
             }
         }
     }
@@ -200,22 +221,22 @@ class SettingsViewModel @Inject constructor(val genreRepository: GenreRepository
         }
     }
 
-    fun onApplyNewDateClicked(dialogType: DateDialogType, date: SearchDate){
+    fun onApplyNewDateClicked(dialogType: DateDialogType, date: SearchDate) {
         viewModelScope.launch {
             emitNewDate(date = date, dialogType = dialogType)
             emitCloseAllDateDialogs()
         }
     }
 
-    fun onCancelDateClicked(){
+    fun onCancelDateClicked() {
         viewModelScope.launch {
             emitCloseAllDateDialogs()
         }
     }
 
-    fun onChangeDateClicked(dialogType: DateDialogType){
+    fun onChangeDateClicked(dialogType: DateDialogType) {
         viewModelScope.launch {
-            when(dialogType){
+            when (dialogType) {
                 DateDialogType.START_DATE -> {
                     _dateDialogsFlow.emit(
                         SettingsScreenDateDialogsState(
@@ -236,10 +257,10 @@ class SettingsViewModel @Inject constructor(val genreRepository: GenreRepository
         }
     }
 
-    fun onResetDateClicked(dialogType: DateDialogType){
+    fun onResetDateClicked(dialogType: DateDialogType) {
         val currentSettings = _settingsFlow.value
         viewModelScope.launch {
-            when(dialogType){
+            when (dialogType) {
                 DateDialogType.START_DATE -> {
                     _settingsFlow.emit(currentSettings.copy(startDate = null))
                 }
@@ -250,13 +271,27 @@ class SettingsViewModel @Inject constructor(val genreRepository: GenreRepository
         }
     }
 
-    private suspend fun emitCloseAllDateDialogs(){
+    fun onResetSortClicked() {
+        viewModelScope.launch {
+            val currentSettings = _settingsFlow.value
+            _settingsFlow.emit(
+                currentSettings.copy(
+                    type = null,
+                    sort = null,
+                    orderBy = null,
+                    status = null
+                )
+            )
+        }
+    }
+
+    private suspend fun emitCloseAllDateDialogs() {
         _dateDialogsFlow.emit(SettingsScreenDateDialogsState(startDate = false, endDate = false))
     }
 
     private suspend fun emitNewDate(date: SearchDate, dialogType: DateDialogType) {
         val currentSettings = _settingsFlow.value
-        when(dialogType){
+        when (dialogType) {
             DateDialogType.START_DATE -> {
                 _settingsFlow.emit(currentSettings.copy(startDate = date))
             }
@@ -306,33 +341,35 @@ class SettingsViewModel @Inject constructor(val genreRepository: GenreRepository
         }
     }
 
-    private suspend fun loadAllGenres(): SettingsScreenBottomSheetEvent.LoadingComplete {
-        val result = viewModelScope.async {
-            val genres = withContext(Dispatchers.Default) {
-                genreRepository.loadGenres(GenresFilter.GENRES)
-            }
-            delay(1000)
-            val explicitGenres =
-                withContext(Dispatchers.Default) {
-                    genreRepository.loadGenres(GenresFilter.EXPLICIT_GENRES)
+    private suspend fun loadAllGenres(): SettingsScreenBottomSheetEvent {
+        val result = coroutineScope {
+            async {
+                val genres = withContext(Dispatchers.Default) {
+                    genreRepository.loadGenres(GenresFilter.GENRES)
                 }
-            delay(1000)
-            val themes = withContext(Dispatchers.Default) {
-                genreRepository.loadGenres(GenresFilter.THEMES)
-            }
-            delay(1000)
-            val demographics =
-                withContext(Dispatchers.Default) {
-                    genreRepository.loadGenres(GenresFilter.DEMOGRAPHICS)
+                delay(1000)
+                val explicitGenres =
+                    withContext(Dispatchers.Default) {
+                        genreRepository.loadGenres(GenresFilter.EXPLICIT_GENRES)
+                    }
+                delay(1000)
+                val themes = withContext(Dispatchers.Default) {
+                    genreRepository.loadGenres(GenresFilter.THEMES)
                 }
+                delay(1000)
+                val demographics =
+                    withContext(Dispatchers.Default) {
+                        genreRepository.loadGenres(GenresFilter.DEMOGRAPHICS)
+                    }
 
 
-            return@async LoadingComplete(
-                genres = genres,
-                explicitGenres = explicitGenres,
-                themes = themes,
-                demographics = demographics
-            )
+                return@async LoadingComplete(
+                    genres = genres,
+                    explicitGenres = explicitGenres,
+                    themes = themes,
+                    demographics = demographics
+                )
+            }
         }
         return result.await()
     }

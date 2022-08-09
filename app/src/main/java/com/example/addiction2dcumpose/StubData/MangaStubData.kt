@@ -20,7 +20,11 @@ object MangaStubData {
         synopsis = "Looking for information on the light novel Yuuwaku Choukyou Hitorijime: Gibo no Himitsu Menu? Find out more with MyAnimeList, the world's most active online anime and manga community and database.",
         genres = listOf(
             MangaItemReceive(id = 12, name = "Hentai"),
-            MangaItemReceive(id = 10, name = "Something")
+            MangaItemReceive(id = 10, name = "Something"),
+            MangaItemReceive(id = 10, name = "Something"),
+            MangaItemReceive(id = 10, name = "Something"),
+            MangaItemReceive(id = 10, name = "Something"),
+            MangaItemReceive(id = 10, name = "Something"),
         ),
         authors = listOf(MangaItemReceive(id = 2, name = "Ivan, Ivanov")),
         serializations = null,

@@ -22,6 +22,7 @@ fun BottomsSheetContent(
     modifier: Modifier = Modifier,
     onItemClick: (Genre) -> Unit,
     event: SettingsScreenBottomSheetEvent,
+    onTryAgainClicked: () -> Unit
 ) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Spacer(modifier = Modifier.size(16.dp))
@@ -40,7 +41,14 @@ fun BottomsSheetContent(
                     onGenresClick = { onItemClick.invoke(it) })
             }
             is SettingsScreenBottomSheetEvent.Error -> {
-                TODO()
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(text = stringResource(id = R.string.some_error), style = MaterialTheme.typography.h5, textAlign = TextAlign.Center)
+                    Spacer(modifier = Modifier.size(10.dp))
+                    Button(onClick = { onTryAgainClicked.invoke() }) {
+                        Text(text = stringResource(R.string.try_again))
+                    }
+                }
+
             }
         }
     }

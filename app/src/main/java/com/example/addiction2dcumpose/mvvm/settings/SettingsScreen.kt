@@ -60,6 +60,7 @@ class SettingsScreen(private val viewModel: SettingsViewModel, settings: SearchS
                         .background(color = colorResource(id = R.color.sheetBackground)),
                     onItemClick = { viewModel.onGenresClick(it) },
                     event = bottomsSheetUi.value,
+                    onTryAgainClicked = { viewModel.onTryAgainClicked() }
                 )
             }, scaffoldState = bottomSheetScaffoldState, sheetPeekHeight = 0.dp) { paddingValues ->
                 Settings(
@@ -100,9 +101,13 @@ class SettingsScreen(private val viewModel: SettingsViewModel, settings: SearchS
                     },
                     onApplySettingsClicked = {
                         onSettingsChanged.invoke(settingsState.value)
-                        navController.popBackStack()},
+                        navController.popBackStack()
+                    },
                     onCancelSettingsClicked = {
                         navController.popBackStack()
+                    },
+                    onResetSortClicked = {
+                        viewModel.onResetSortClicked()
                     }
                 )
                 ScoreDialogs(
@@ -222,7 +227,8 @@ private fun Settings(
     onDateChangeClicked: (DateDialogType) -> Unit,
     onDateResetClicked: (DateDialogType) -> Unit,
     onApplySettingsClicked: () -> Unit,
-    onCancelSettingsClicked: () -> Unit
+    onCancelSettingsClicked: () -> Unit,
+    onResetSortClicked: () -> Unit
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp
     val spacerModifier = Modifier.height(16.dp)
@@ -264,6 +270,10 @@ private fun Settings(
                         list = Sort.values()
                     )
                 }
+            }
+            Spacer(modifier = spacerModifier)
+            Button(onClick = { onResetSortClicked.invoke() }) {
+                Text(text = stringResource(id = R.string.reset))
             }
             Spacer(modifier = spacerModifier)
             Text(
@@ -495,7 +505,8 @@ private fun <T : SettingsType> TextDropMenu(
         DropMenu(expanded = state.value, list = list, textStyle = textStyle, onSelectType = {
             onSelectType.invoke(it)
             state.value = false
-        })
+        },
+            onDismissRequest = { state.value = false })
     }
 }
 
@@ -505,9 +516,13 @@ private fun <T : SettingsType> DropMenu(
     expanded: Boolean,
     list: Array<T>,
     onSelectType: (SettingsType) -> Unit,
-    textStyle: TextStyle = TextStyle()
+    textStyle: TextStyle = TextStyle(),
+    onDismissRequest: () -> Unit
 ) {
-    DropdownMenu(modifier = modifier, expanded = expanded, onDismissRequest = { }) {
+    DropdownMenu(
+        modifier = modifier,
+        expanded = expanded,
+        onDismissRequest = { onDismissRequest.invoke() }) {
         list.forEach { settingsType ->
             DropdownMenuItem(onClick = { onSelectType.invoke(settingsType) }) {
                 Text(
@@ -541,6 +556,7 @@ private fun SettingsScreenPreview() {
         onDateResetClicked = {},
         onDateChangeClicked = {},
         onApplySettingsClicked = {},
-        onCancelSettingsClicked = {})
+        onCancelSettingsClicked = {},
+        onResetSortClicked = {})
 }
 

@@ -2,6 +2,7 @@ package com.example.addiction2dcumpose.mvvm.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.addiction2dcumpose.States.SearchMangaState
 import com.example.addiction2dcumpose.dataClasses.MangaData
 import com.example.addiction2dcumpose.dataClasses.SearchSettings
@@ -27,6 +28,15 @@ class SearchViewModel @Inject constructor(private val mangaRepository: MangaRepo
 
     val settingsFlowState = _settingsFlowState.asStateFlow()
     val screenFlowState = _screenFlowState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            if (mangaList.isNullOrEmpty()){
+                loadNewList()
+            }
+        }
+
+    }
 
 
     fun onPageScrolled() {

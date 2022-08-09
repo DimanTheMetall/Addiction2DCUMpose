@@ -31,6 +31,7 @@ import com.example.addiction2dcumpose.DI.settingsComponent.DaggerSettingsCompone
 import com.example.addiction2dcumpose.R
 import com.example.addiction2dcumpose.States.SearchMangaState
 import com.example.addiction2dcumpose.StubData.MangaStubData
+import com.example.addiction2dcumpose.customLayout.CustomFlexBox
 import com.example.addiction2dcumpose.dataClasses.MangaData
 import com.example.addiction2dcumpose.dataClasses.SearchSettings
 import com.example.addiction2dcumpose.findActivity
@@ -130,6 +131,8 @@ fun SearchingList(
                             .clickable {
                                 onIconClicked.invoke()
                             }
+                            .padding(end = 4.dp)
+
                     )
                 }
             )
@@ -191,7 +194,12 @@ private fun CardItem(modifier: Modifier = Modifier, mangaData: MangaData) {
 
 @Composable
 private fun MangaInform(modifier: Modifier = Modifier, mangaData: MangaData) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+
+    ) {
         Text(
             text = mangaData.title ?: "No title",
             modifier = Modifier.padding(top = 8.dp),
@@ -212,7 +220,7 @@ private fun MangaInform(modifier: Modifier = Modifier, mangaData: MangaData) {
                 start = 8.dp
             )
         )
-        if (!mangaData.genres.isNullOrEmpty()) CustomFlexBox {
+        if (!mangaData.genres.isNullOrEmpty()) CustomFlexBox(maxLines = 2, modifier = Modifier.height(80.dp)) {
             mangaData.genres.forEach { genre ->
                 TextItem(string = genre.name)
             }
@@ -229,44 +237,6 @@ private fun TextItem(modifier: Modifier = Modifier, string: String) {
     ) {
         Text(text = string, modifier = Modifier.padding(4.dp))
     }
-}
-
-@Composable
-private fun CustomFlexBox(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
-    Layout(content = content, modifier = modifier, measurePolicy = { measurables, constraints ->
-        val placeables = measurables.map { measurable ->
-            measurable.measure(constraints)
-        }
-        var maxWidth = 0
-        var maxHeight = placeables[0].height
-        var currentWidth = 0
-
-        placeables.forEach { placeable ->
-            if (placeable.width + currentWidth > constraints.maxWidth) {
-                println("AAA is true")
-                currentWidth = 0
-                maxWidth = max(a = placeable.width + currentWidth, b = maxWidth)
-                maxHeight += placeable.height
-            }
-            currentWidth += placeable.width
-        }
-
-        layout(width = constraints.maxWidth, height = maxHeight) {
-            var placeableY = 0
-            var placeableX = 0
-
-            placeables.forEach { placeable ->
-                if (placeable.width + placeableX > constraints.maxWidth) {
-                    placeableX = 0
-                    placeableY += placeable.height
-                }
-
-                placeable.placeRelative(placeableX, placeableY)
-                placeableX += placeable.width
-            }
-
-        }
-    })
 }
 
 

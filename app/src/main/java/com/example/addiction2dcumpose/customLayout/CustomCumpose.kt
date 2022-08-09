@@ -1,10 +1,7 @@
 package com.example.addiction2dcumpose.customLayout
 
-import android.app.DatePickerDialog
-import android.renderscript.ScriptGroup
 import android.widget.DatePicker
 import android.widget.NumberPicker
-import android.widget.Spinner
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
@@ -31,44 +28,57 @@ import com.example.addiction2dcumpose.dataClasses.SearchDate
 import com.example.addiction2dcumpose.dataClasses.SearchSettings
 import com.example.addiction2dcumpose.databinding.DatePickerBinding
 import com.example.rxpractic.ui.theme.Addiction2DTheme
-import com.google.android.material.datepicker.MaterialDatePicker
 import kotlin.math.max
+import kotlin.math.min
 
 @Composable
-fun CustomFlexBox(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
-    Layout(content = content, modifier = modifier, measurePolicy = { measurables, constraints ->
-        val placeables = measurables.map { measurable ->
-            measurable.measure(constraints)
-        }
-        var maxWidth = 0
-        var maxHeight = placeables[0].height
-        var currentWidth = 0
-
-        placeables.forEach { placeable ->
-            if (placeable.width + currentWidth > constraints.maxWidth) {
-                currentWidth = 0
-                maxWidth = max(a = placeable.width + currentWidth, b = maxWidth)
-                maxHeight += placeable.height
+fun CustomFlexBox(
+    modifier: Modifier = Modifier,
+    maxLines: Int = 10,
+    content: @Composable () -> Unit
+) {
+    Box(modifier = modifier) {
+        Layout(content = content, measurePolicy = { measurables, constraints ->
+            val placeables = measurables.map { measurable ->
+                measurable.measure(constraints)
             }
-            currentWidth += placeable.width
-        }
-
-        layout(width = constraints.maxWidth, height = maxHeight) {
-            var placeableY = 0
-            var placeableX = 0
+            var maxWidth = 0
+            var maxHeight = placeables[0].height
+            var currentWidth = 0
+            var currentLines = 1
 
             placeables.forEach { placeable ->
-                if (placeable.width + placeableX > constraints.maxWidth) {
-                    placeableX = 0
-                    placeableY += placeable.height
-                }
+                if (placeable.width + currentWidth > constraints.maxWidth) {
 
-                placeable.placeRelative(placeableX, placeableY)
-                placeableX += placeable.width
+                    currentWidth = 0
+                    maxWidth = max(a = placeable.width + currentWidth, b = maxWidth)
+                    maxHeight += placeable.height
+                }
+                currentWidth += placeable.width
             }
 
-        }
-    })
+            layout(width = constraints.maxWidth, height = min(maxHeight, constraints.maxHeight)) {
+                var placeableY = 0
+                var placeableX = 0
+
+                placeables.forEach { placeable ->
+                    if (placeable.width + placeableX > constraints.maxWidth) {
+                        currentLines++
+                        placeableX = 0
+                        placeableY += placeable.height
+                    }
+
+                    if (currentLines <= maxLines) {
+                        placeable.placeRelative(placeableX, placeableY)
+                        placeableX += placeable.width
+                    }
+
+
+                }
+
+            }
+        })
+    }
 }
 
 @Composable
@@ -176,7 +186,10 @@ fun DatePickerDialog(
                     }
                 }
 
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
                     Button(onClick = {
                         onApplyClicked.invoke(
                             date.value ?: SearchDate(2000, 1, 1),
@@ -196,12 +209,12 @@ fun DatePickerDialog(
 
 @Preview
 @Composable
-private fun DatePickerPreview(){
+private fun DatePickerPreview() {
     Addiction2DTheme {
         DatePickerDialog(
             state = SearchSettings(),
             dateType = DateDialogType.START_DATE,
-            onApplyClicked = {searchDate, dateDialogType ->  },
+            onApplyClicked = { searchDate, dateDialogType -> },
             onCancelClicked = {}
         )
     }
