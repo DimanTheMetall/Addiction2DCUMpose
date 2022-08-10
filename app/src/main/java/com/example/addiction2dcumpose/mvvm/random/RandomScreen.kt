@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.SnackbarDefaults.backgroundColor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -14,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -30,7 +28,6 @@ import com.example.addiction2dcumpose.customLayout.CustomFlexBox
 import com.example.addiction2dcumpose.dataClasses.*
 import com.example.rxpractic.ui.theme.Addiction2DTheme
 import com.skydoves.landscapist.CircularReveal
-import kotlin.math.max
 
 
 class RandomScreen(val viewModel: RandomViewModel) : BaseScreen() {
@@ -42,7 +39,7 @@ class RandomScreen(val viewModel: RandomViewModel) : BaseScreen() {
 
         when (state.value) {
             is MangaResultState.Success -> {
-                SuccessResultScreen(
+                MangaInformation(
                     mangaData = (state.value as MangaResultState.Success).mangaData
                 )
             }
@@ -117,7 +114,7 @@ private fun OnErrorScreen(
 }
 
 @Composable
-private fun SuccessResultScreen(
+fun MangaInformation(
     mangaData: MangaData,
 ) {
     val scrollState = rememberScrollState()
@@ -398,7 +395,7 @@ private fun ImageTitleCard(
 @Preview(showBackground = true)
 @Composable
 private fun OnSuccessScreenPreview() {
-    SuccessResultScreen(
+    MangaInformation(
         mangaData = mangaData,
     )
 }

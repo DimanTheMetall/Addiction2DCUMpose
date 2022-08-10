@@ -1,5 +1,6 @@
 package com.example.addiction2dcumpose.mvvm.search
 
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
@@ -14,7 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -24,9 +24,11 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.addiction2dcumpose.Constants
 import com.example.addiction2dcumpose.DI.DaggerViewModelCreator
 import com.example.addiction2dcumpose.DI.daggerViewModel
+import com.example.addiction2dcumpose.DI.moreinfoComponent.DaggerMoreInfoComponent
 import com.example.addiction2dcumpose.DI.settingsComponent.DaggerSettingsComponent
 import com.example.addiction2dcumpose.R
 import com.example.addiction2dcumpose.States.SearchMangaState
@@ -36,9 +38,10 @@ import com.example.addiction2dcumpose.dataClasses.MangaData
 import com.example.addiction2dcumpose.dataClasses.SearchSettings
 import com.example.addiction2dcumpose.findActivity
 import com.example.addiction2dcumpose.getAsAddiction
+import com.example.addiction2dcumpose.mvvm.moreinfo.MoreInfoScreen
 import com.example.addiction2dcumpose.mvvm.settings.SettingsScreen
 import com.example.rxpractic.ui.theme.Addiction2DTheme
-import kotlin.math.max
+import com.google.gson.Gson
 
 class SearchScreen(private val viewModel: SearchViewModel) : DaggerViewModelCreator {
 
@@ -55,7 +58,13 @@ class SearchScreen(private val viewModel: SearchViewModel) : DaggerViewModelCrea
                     settingsState = settingsState.value,
                     onValueChanged = { value -> viewModel.onTextFieldValueChanged(value) },
                     onIconClicked = { navController.navigate("MangaSettings") },
-                    onPagingScroll = { viewModel.onPageScrolled() }
+                    onPagingScroll = { viewModel.onPageScrolled() },
+                    onItemClicked = { mangaData ->
+                        val dataJson = Uri.encode(Gson().toJson(mangaData))
+                        navController.navigate(
+                            route = "moreInfo/$dataJson"
+                        )
+                    }
                 )
             }
             composable("MangaSettings") {
@@ -72,7 +81,24 @@ class SearchScreen(private val viewModel: SearchViewModel) : DaggerViewModelCrea
                     viewModel.changeSettings(newSettings)
                 }, navController = navController)
             }
-            composable("moreInfo") {}
+            composable(
+                "moreInfo/{mangaData}",
+                arguments = listOf(
+                    navArgument(
+                        "mangaData",
+                        builder = { type = MangaData.MangaDataArgument })
+                )
+            ) {
+                val activity = LocalContext.current.findActivity()
+                val moreInfoViewModel = DaggerMoreInfoComponent.factory()
+                    .create(activity.application.getAsAddiction().addictionComponent)
+                    .getViewModel()
+
+                MoreInfoScreen(
+                    moreInfoViewModel,
+                    it.arguments?.getParcelable("mangaData")!!
+                ).Screen()
+            }
         }
     }
 
@@ -84,7 +110,8 @@ fun SearchingList(
     settingsState: SearchSettings,
     onValueChanged: (String) -> Unit,
     onIconClicked: () -> Unit,
-    onPagingScroll: () -> Unit
+    onPagingScroll: () -> Unit,
+    onItemClicked: (MangaData) -> Unit
 ) {
     val scrollState = rememberLazyListState()
     val onPagingItemScrollStateBoolean by rememberUpdatedState(newValue = derivedStateOf {
@@ -146,7 +173,11 @@ fun SearchingList(
                     item {
                         CardItem(
                             mangaData = mangaData,
-                            modifier = Modifier.size(width = 350.dp, height = 220.dp)
+                            modifier = Modifier
+                                .size(width = 350.dp, height = 220.dp)
+                                .clickable {
+                                    onItemClicked.invoke(mangaData)
+                                }
                         )
                     }
                 }
@@ -199,7 +230,7 @@ private fun MangaInform(modifier: Modifier = Modifier, mangaData: MangaData) {
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
 
-    ) {
+        ) {
         Text(
             text = mangaData.title ?: "No title",
             modifier = Modifier.padding(top = 8.dp),
@@ -254,7 +285,8 @@ private fun SearchingListPreview() {
         settingsState = SearchSettings(),
         onValueChanged = {},
         onIconClicked = {},
-        onPagingScroll = {}
+        onPagingScroll = {},
+        onItemClicked = {}
     )
 }
 
