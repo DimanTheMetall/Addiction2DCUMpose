@@ -45,11 +45,12 @@ fun CustomFlexBox(
             var maxWidth = 0
             var maxHeight = placeables[0].height
             var currentWidth = 0
-            var currentLines = 1
+            var currentLines = 0
 
-            placeables.forEach { placeable ->
+            for (placeable in placeables) {
                 if (placeable.width + currentWidth > constraints.maxWidth) {
-
+                    currentLines++
+                    if (currentLines >= maxLines) break
                     currentWidth = 0
                     maxWidth = max(a = placeable.width + currentWidth, b = maxWidth)
                     maxHeight += placeable.height
@@ -57,25 +58,22 @@ fun CustomFlexBox(
                 currentWidth += placeable.width
             }
 
-            layout(width = constraints.maxWidth, height = min(maxHeight, constraints.maxHeight)) {
+
+            layout(width = constraints.maxWidth, height = maxHeight) {
                 var placeableY = 0
                 var placeableX = 0
-
+                currentLines = 0
                 placeables.forEach { placeable ->
                     if (placeable.width + placeableX > constraints.maxWidth) {
                         currentLines++
                         placeableX = 0
                         placeableY += placeable.height
                     }
-
-                    if (currentLines <= maxLines) {
+                    if (currentLines < maxLines) {
                         placeable.placeRelative(placeableX, placeableY)
                         placeableX += placeable.width
                     }
-
-
                 }
-
             }
         })
     }

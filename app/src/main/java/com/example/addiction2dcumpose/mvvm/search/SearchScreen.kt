@@ -186,7 +186,7 @@ private fun CardItem(modifier: Modifier = Modifier, mangaData: MangaData) {
                 previewPlaceholder = R.drawable.placeholder,
                 error = painterResource(id = R.drawable.placeholder)
             )
-            MangaInform(mangaData = mangaData)
+            MangaInform(mangaData = mangaData, modifier = Modifier.padding(4.dp))
         }
     }
 }
@@ -220,7 +220,7 @@ private fun MangaInform(modifier: Modifier = Modifier, mangaData: MangaData) {
                 start = 8.dp
             )
         )
-        if (!mangaData.genres.isNullOrEmpty()) CustomFlexBox(maxLines = 2, modifier = Modifier.height(80.dp)) {
+        if (!mangaData.genres.isNullOrEmpty()) CustomFlexBox(maxLines = 2) {
             mangaData.genres.forEach { genre ->
                 TextItem(string = genre.name)
             }
