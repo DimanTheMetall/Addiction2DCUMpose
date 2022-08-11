@@ -1,12 +1,14 @@
 package com.example.addiction2dcumpose.dataClasses
 
 import android.os.Parcelable
+import androidx.room.Embedded
 import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
 class Images(
     @SerializedName("jpg")
+    @Embedded
     val jpg: JPGImage
 ):Parcelable
 

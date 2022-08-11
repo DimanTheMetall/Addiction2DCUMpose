@@ -1,6 +1,7 @@
 package com.example.addiction2dcumpose.repositories
 
 import com.example.addiction2dcumpose.RetrofitService.RetrofitService
+import com.example.addiction2dcumpose.data.database.AddictionDataBase
 import com.example.addiction2dcumpose.dataClasses.MangaListReceive
 import com.example.addiction2dcumpose.dataClasses.MangaReceive
 import com.example.addiction2dcumpose.dataClasses.SearchSettings
@@ -9,7 +10,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class MangaRepositoryImpl @Inject constructor(private val retrofitService: RetrofitService) :
+class MangaRepositoryImpl @Inject constructor(private val retrofitService: RetrofitService, private val dataBase: AddictionDataBase) :
     MangaRepository {
 
     override suspend fun loadRandomManga(): MangaReceive = coroutineScope {

@@ -11,4 +11,7 @@ object Constants {
     //LOGS
     const val ERROR_LOG = "ERROR"
 
+    //DataBase
+    const val DB_NAME = "AddictionManga"
+
 }
