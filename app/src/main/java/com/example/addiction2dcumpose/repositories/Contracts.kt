@@ -10,6 +10,12 @@ interface MangaRepository {
 
     suspend fun loadMangaList(searchSettings: SearchSettings): MangaListReceive
 
+    suspend fun saveMangaTitle(mangaData: MangaData)
+
+    suspend fun containsCheck(mangaData: MangaData): Boolean
+
+    suspend fun deleteMangaTitle(mangaData: MangaData)
+
 }
 
 interface GenreRepository {

@@ -1,7 +1,9 @@
 package com.example.addiction2dcumpose.repositories
 
 import com.example.addiction2dcumpose.RetrofitService.RetrofitService
+import com.example.addiction2dcumpose.StubData.MangaStubData.mangaData
 import com.example.addiction2dcumpose.data.database.AddictionDataBase
+import com.example.addiction2dcumpose.dataClasses.MangaData
 import com.example.addiction2dcumpose.dataClasses.MangaListReceive
 import com.example.addiction2dcumpose.dataClasses.MangaReceive
 import com.example.addiction2dcumpose.dataClasses.SearchSettings
@@ -10,8 +12,13 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class MangaRepositoryImpl @Inject constructor(private val retrofitService: RetrofitService, private val dataBase: AddictionDataBase) :
+class MangaRepositoryImpl @Inject constructor(
+    private val retrofitService: RetrofitService,
+    private val dataBase: AddictionDataBase
+) :
     MangaRepository {
+
+    //HTTP operation
 
     override suspend fun loadRandomManga(): MangaReceive = coroutineScope {
         withContext(Dispatchers.IO) { retrofitService.loadRandomManga() }
@@ -40,5 +47,27 @@ class MangaRepositoryImpl @Inject constructor(private val retrofitService: Retro
             }
         }
     }
+
+    //DataBase operation
+
+    override suspend fun saveMangaTitle(mangaData: MangaData) {
+        withContext(Dispatchers.IO) {
+            dataBase.getMangaDataDao().saveMangaTitle(mangaData = mangaData)
+        }
+    }
+
+    override suspend fun containsCheck(mangaData: MangaData): Boolean {
+        return withContext(Dispatchers.IO) {
+            dataBase.getMangaDataDao().containsCheck(mangaData = mangaData)
+        }
+
+    }
+
+    override suspend fun deleteMangaTitle(mangaData: MangaData) {
+        withContext(Dispatchers.IO){
+            dataBase.getMangaDataDao().deleteMangaTitle(mangaData.malId)
+        }
+    }
+
 
 }
