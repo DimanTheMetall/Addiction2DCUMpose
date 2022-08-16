@@ -51,7 +51,7 @@ class NavigateScreen(private val navController: NavController): BaseScreen() {
                 }
 
                 ChooseCard(title = R.string.favorite) {
-
+                    navController.navigate("favorite")
                 }
 
                 ChooseCard(title = R.string.random) {

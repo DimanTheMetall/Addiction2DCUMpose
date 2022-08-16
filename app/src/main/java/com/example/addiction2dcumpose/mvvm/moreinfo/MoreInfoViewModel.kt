@@ -29,9 +29,8 @@ class MoreInfoViewModel @Inject constructor(private val mangaRepository: MangaRe
             kotlin.runCatching {
                 mangaRepository.saveMangaTitle(mangaData = mangaData)
             }.onSuccess {
-                println("AAA")
                 _favoriteFlow.emit(true)
-            }.onFailure { println("AAA $it") }
+            }
         }
     }
 
@@ -42,7 +41,6 @@ class MoreInfoViewModel @Inject constructor(private val mangaRepository: MangaRe
             }.onSuccess {
                 _favoriteFlow.emit(false)
             }
-
         }
     }
 

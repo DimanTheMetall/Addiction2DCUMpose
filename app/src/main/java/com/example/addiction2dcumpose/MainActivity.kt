@@ -15,8 +15,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.addiction2dcumpose.DI.DaggerViewModelCreator
 import com.example.addiction2dcumpose.DI.daggerViewModel
+import com.example.addiction2dcumpose.DI.favoriteComponent.DaggerFavoriteComponent
 import com.example.addiction2dcumpose.DI.randomComponent.DaggerRandomComponent
 import com.example.addiction2dcumpose.DI.searchComponent.DaggerSearchComponent
+import com.example.addiction2dcumpose.mvvm.favorites.FavoriteScreen
 import com.example.addiction2dcumpose.mvvm.navigate.NavigateScreen
 import com.example.addiction2dcumpose.mvvm.random.RandomScreen
 import com.example.addiction2dcumpose.mvvm.random.RandomViewModel
@@ -43,7 +45,13 @@ class MainActivity : AppCompatActivity(), DaggerViewModelCreator {
                         viewModel = searchViewModel
                     ).Screen()
                 }
-                composable("favorite") {}
+                composable("favorite") {
+                    val favoriteViewModel = daggerViewModel {
+                        DaggerFavoriteComponent.factory()
+                            .create(application.getAsAddiction().addictionComponent).getViewModel()
+                    }
+                    FavoriteScreen(favoriteViewModel).Screen()
+                }
                 composable("random") {
 
                     val randomViewModel = daggerViewModel(viewModelInstanceCreator = {
@@ -57,9 +65,6 @@ class MainActivity : AppCompatActivity(), DaggerViewModelCreator {
 
         }
     }
-
-
-
 
 
 }

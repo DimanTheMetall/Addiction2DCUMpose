@@ -30,7 +30,7 @@ data class MangaItemEntity(
     @ColumnInfo(name = "manga_id")
     val mangaId: Long,
 
-    @ColumnInfo(name = "type")
+    @ColumnInfo(name = "item_type")
     val type: String
 
 ) {

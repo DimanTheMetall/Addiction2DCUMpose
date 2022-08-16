@@ -29,6 +29,9 @@ class RandomViewModel @Inject constructor(private val mangaRepository: MangaRepo
     )
     val buttonsStateFlow = _buttonsStateFlow.asStateFlow()
 
+    private val _favoriteFlow = MutableStateFlow(false)
+    val favoriteFlow = _favoriteFlow.asStateFlow()
+
     init {
         viewModelScope.launch(Dispatchers.Default) {
             _mangaFlowData.collect { mangaResult ->
@@ -42,8 +45,36 @@ class RandomViewModel @Inject constructor(private val mangaRepository: MangaRepo
             }
 
         }
-
         onNextCLick()
+    }
+
+    private fun checkForContains(mangaData: MangaData) {
+        viewModelScope.launch {
+            kotlin.runCatching {
+                _favoriteFlow.emit(mangaRepository.containsCheck(mangaData))
+            }.onFailure { _favoriteFlow.emit(false) }
+        }
+    }
+
+
+    fun onAddInFavoriteClicked(mangaData: MangaData) {
+        viewModelScope.launch {
+            kotlin.runCatching {
+                mangaRepository.saveMangaTitle(mangaData = mangaData)
+            }.onSuccess {
+                _favoriteFlow.emit(true)
+            }
+        }
+    }
+
+    fun onDeleteClicked(mangaData: MangaData) {
+        viewModelScope.launch {
+            kotlin.runCatching {
+                mangaRepository.deleteMangaTitle(mangaData = mangaData)
+            }.onSuccess {
+                _favoriteFlow.emit(false)
+            }
+        }
     }
 
 
@@ -64,7 +95,9 @@ class RandomViewModel @Inject constructor(private val mangaRepository: MangaRepo
     fun onBackClick() {
         viewModelScope.launch {
             currentIndex--
-            _mangaFlowData.emit(MangaResultState.Success(mangaList[currentIndex]))
+            val data = MangaResultState.Success(mangaList[currentIndex])
+            _mangaFlowData.emit(data)
+            checkForContains(data.mangaData)
         }
     }
 
@@ -73,7 +106,9 @@ class RandomViewModel @Inject constructor(private val mangaRepository: MangaRepo
     private suspend fun getNextTitle() {
         viewModelScope.launch {
             currentIndex++
-            _mangaFlowData.emit(MangaResultState.Success(mangaList[currentIndex]))
+            val data = MangaResultState.Success(mangaList[currentIndex])
+            _mangaFlowData.emit(data)
+            checkForContains(data.mangaData)
         }
     }
 

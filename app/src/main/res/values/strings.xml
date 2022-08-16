@@ -29,6 +29,7 @@
     <string name="reset">Reset</string>
     <string name="date">Date</string>
     <string name="try_again">Try again</string>
+    <string name="null_favorite">You не добавить manga in свой favorite list</string>
 
 
 </resources>

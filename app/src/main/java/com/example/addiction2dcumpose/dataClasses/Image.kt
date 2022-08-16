@@ -6,14 +6,14 @@ import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-class Images(
+data class Images(
     @SerializedName("jpg")
     @Embedded
     val jpg: JPGImage
 ):Parcelable
 
 @Parcelize
-class JPGImage(
+data class JPGImage(
     @SerializedName("image_url")
     val imageUrl: String,
 

@@ -195,7 +195,7 @@ fun SearchingList(
 }
 
 @Composable
-private fun CardItem(modifier: Modifier = Modifier, mangaData: MangaData) {
+fun CardItem(modifier: Modifier = Modifier, mangaData: MangaData) {
     val roundCornerShape = RoundedCornerShape(12.dp)
     Card(
         modifier = modifier, border = BorderStroke(2.dp, color = MaterialTheme.colors.primary),

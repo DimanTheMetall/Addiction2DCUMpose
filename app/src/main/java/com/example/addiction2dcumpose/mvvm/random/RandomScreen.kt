@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -25,7 +26,8 @@ import com.example.addiction2dcumpose.States.MangaResultState
 import com.example.addiction2dcumpose.States.RandomScreenButtonState
 import com.example.addiction2dcumpose.StubData.MangaStubData.mangaData
 import com.example.addiction2dcumpose.customLayout.CustomFlexBox
-import com.example.addiction2dcumpose.dataClasses.*
+import com.example.addiction2dcumpose.dataClasses.MangaData
+import com.example.addiction2dcumpose.dataClasses.MangaItemReceive
 import com.example.rxpractic.ui.theme.Addiction2DTheme
 import com.skydoves.landscapist.CircularReveal
 
@@ -36,12 +38,31 @@ class RandomScreen(val viewModel: RandomViewModel) : BaseScreen() {
     fun Screen() {
         val state = viewModel.mangaFLowData.collectAsState()
         val buttonsState = viewModel.buttonsStateFlow.collectAsState()
+        val favoriteButtonState = viewModel.favoriteFlow.collectAsState()
 
         when (state.value) {
             is MangaResultState.Success -> {
-                MangaInformation(
-                    mangaData = (state.value as MangaResultState.Success).mangaData
-                )
+                Addiction2DTheme {
+                    Box(contentAlignment = Alignment.BottomEnd) {
+                        MangaInformation(
+                            mangaData = (state.value as MangaResultState.Success).mangaData
+                        )
+                        IconButton(modifier = Modifier.padding(16.dp), onClick = {
+                            if (!favoriteButtonState.value && (state.value as MangaResultState.Success).mangaData != null) {
+                                viewModel.onAddInFavoriteClicked(mangaData = (state.value as MangaResultState.Success).mangaData)
+                            } else {
+                                viewModel.onDeleteClicked(mangaData = (state.value as MangaResultState.Success).mangaData)
+                            }
+                        }) {
+                            Icon(
+                                modifier = Modifier.size(46.dp),
+                                painter = painterResource(id = R.drawable.ic_favorite),
+                                contentDescription = null,
+                                tint = if (favoriteButtonState.value) MaterialTheme.colors.primary else Color.DarkGray
+                            )
+                        }
+                    }
+                }
             }
             MangaResultState.Error -> {
                 OnErrorScreen()
@@ -54,7 +75,7 @@ class RandomScreen(val viewModel: RandomViewModel) : BaseScreen() {
             onNextClick = { viewModel.onNextCLick() },
             onBackClick = { viewModel.onBackClick() },
             state = buttonsState.value,
-            verticalAlignment =Alignment.Bottom,
+            verticalAlignment = Alignment.Bottom,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(bottom = 10.dp)
@@ -152,7 +173,7 @@ fun MangaInformation(
                 Spacer(modifier = Modifier.size(space))
             }
 
-            if (!mangaData.themes.isNullOrEmpty()){
+            if (!mangaData.themes.isNullOrEmpty()) {
                 ItemsCard(
                     itemsList = mangaData.themes,
                     shape = cardShape,
@@ -164,7 +185,7 @@ fun MangaInformation(
                 )
                 Spacer(modifier = Modifier.size(space))
             }
-            if (!mangaData.serializations.isNullOrEmpty()){
+            if (!mangaData.serializations.isNullOrEmpty()) {
                 ItemsCard(
                     itemsList = mangaData.serializations,
                     shape = cardShape,

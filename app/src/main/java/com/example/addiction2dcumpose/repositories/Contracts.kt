@@ -16,6 +16,8 @@ interface MangaRepository {
 
     suspend fun deleteMangaTitle(mangaData: MangaData)
 
+    suspend fun getAllMangaTitlesWithItems(): List<MangaData>
+
 }
 
 interface GenreRepository {

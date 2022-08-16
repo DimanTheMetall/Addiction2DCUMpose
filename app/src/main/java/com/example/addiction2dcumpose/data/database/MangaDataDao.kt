@@ -26,6 +26,9 @@ interface MangaDataDao {
     @Query("SELECT * FROM manga_items WHERE manga_items.manga_id = :id")
     suspend fun getAllMangaItemsById(id: Long): List<MangaItemEntity>
 
+    @Query("SELECT * FROM manga JOIN manga_items " +
+            "ON manga.mal_id = manga_items.manga_id")
+    suspend fun getAllMangaTitlesWithItems(): Map<MangaEntity, List<MangaItemEntity>>
 
     @Transaction
     suspend fun saveMangaTitle(mangaData: MangaData) {

@@ -7,7 +7,7 @@ import dagger.Component
 import javax.inject.Scope
 
 @SearchScope
-@Component(modules = [SearchModule::class], dependencies = [AddictionComponent::class])
+@Component(modules = [MangaModule::class], dependencies = [AddictionComponent::class])
 interface SearchComponent {
 
     fun getViewModel(): SearchViewModel
